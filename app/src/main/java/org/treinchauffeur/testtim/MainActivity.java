@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         edt1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -44,9 +43,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
+            public void afterTextChanged(Editable editable) {}
         });
 
         btnClose.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public final static int Overlay_REQUEST_CODE = 251;
+
     public void checkDrawOverlayPermission() {
         if (!Settings.canDrawOverlays(mActivity)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
@@ -85,12 +83,9 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case Overlay_REQUEST_CODE: {
-                if (Settings.canDrawOverlays(mActivity)) {
-                    openFloatingWindow();
-                }
-                break;
+        if (requestCode == Overlay_REQUEST_CODE) {
+            if (Settings.canDrawOverlays(mActivity)) {
+                openFloatingWindow();
             }
         }
     }

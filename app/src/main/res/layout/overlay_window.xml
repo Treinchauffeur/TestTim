@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#22000000"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/btnClose"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:text="X" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/MaterialAlertDialog.Material3.Title.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TestTim "
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tvSubTitle"
+            style="@style/TextAppearance.Material3.ActionBar.Subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/tvTitle"
+            android:text="v1.0.0"
+            android:textColor="@color/white" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.ActionBar.Subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="GNSS fix: ERROR / 2D / 3D"
+            android:textColor="#FF0000"/>
+
+        <TextView
+            android:id="@+id/tvSatellites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Actual lat/long: -1.00000, -1.00000" />
+
+        <TextView
+            android:id="@+id/tvAccuracy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accuracy: 9999m" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.ActionBar.Subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="Signal strength" />
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="150dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:background="#11ffffff">
+
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:padding="10dp">
+
+                <LinearLayout
+                    android:id="@+id/signalStrengthGraph"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="10dp"
+                    android:gravity="bottom"
+                    android:orientation="horizontal"
+                    >
+
+
+                    <View
+                        android:id="@+id/sat1"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat2"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat3"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat4"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat5"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat6"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat7"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat8"
+                        android:layout_width="8dp"
+                        android:layout_height="10dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat9"
+                        android:layout_width="8dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#FFFF00" />
+
+                    <View
+                        android:id="@+id/sat10"
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00FF00" />
+
+                    <View
+                        android:id="@+id/sat11"
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00FF00" />
+
+                    <View
+                        android:id="@+id/sat12"
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00FF00" />
+
+                    <View
+                        android:id="@+id/sat13"
+                        android:layout_width="8dp"
+                        android:layout_height="70dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#FFFF00" />
+
+                    <View
+                        android:id="@+id/sat14"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat15"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat16"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat17"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat18"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat19"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat20"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat21"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat22"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat23"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat24"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat25"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat26"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat27"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat28"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat29"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat30"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat31"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat32"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+                    <View
+                        android:id="@+id/sat33"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#ff0000" />
+
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+
+        </LinearLayout>
+
+        <TextView
+            style="@style/TextAppearance.Material3.ActionBar.Subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="Accelerometer" />
+
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginVertical="10dp"
+                android:background="#11ffffff"
+                android:gravity="bottom"
+                android:padding="10dp" />
+
+            <View
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginVertical="10dp"
+                android:background="#11ffffff"
+                android:gravity="bottom"
+                android:layout_margin="10dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

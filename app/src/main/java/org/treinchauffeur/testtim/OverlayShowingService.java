@@ -56,27 +56,21 @@ public class OverlayShowingService extends Service {
     }
 
     WindowManager.LayoutParams mWindowsParams;
+
     private void moveView() {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int width = (int) (metrics.widthPixels * 0.7f);
         int height = (int) (metrics.heightPixels * 0.45f);
 
         mWindowsParams = new WindowManager.LayoutParams(
-                width,//WindowManager.LayoutParams.WRAP_CONTENT,
-                height,//WindowManager.LayoutParams.WRAP_CONTENT,
-                //WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
-
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                ,
-
-                //WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, // Not displaying keyboard on bg activity's EditText
-                //WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, //Not work with EditText on keyboard
-                PixelFormat.TRANSLUCENT);
+                width,
+                height,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                PixelFormat.OPAQUE);
 
 
         mWindowsParams.gravity = Gravity.TOP | Gravity.LEFT;
-        //params.x = 0;
         mWindowsParams.y = 100;
         mWindowManager.addView(mView, mWindowsParams);
 
@@ -87,6 +81,7 @@ public class OverlayShowingService extends Service {
             private float initialTouchY;
 
             long startTime = System.currentTimeMillis();
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (System.currentTimeMillis() - startTime <= 300) {
@@ -146,10 +141,11 @@ public class OverlayShowingService extends Service {
 
     private boolean wasInFocus = true;
     private EditText edt1;
+
     private void allAboutLayout(Intent intent) {
 
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mView = layoutInflater.inflate(R.layout.ovelay_window, null);
+        mView = layoutInflater.inflate(R.layout.overlay_window, null);
 
         edt1 = (EditText) mView.findViewById(R.id.edt1);
         final TextView tvValue = (TextView) mView.findViewById(R.id.tvValue);
