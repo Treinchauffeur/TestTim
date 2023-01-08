@@ -294,6 +294,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-
+        //Might be a duplicate call, but probably stil necessary
     }
 }
