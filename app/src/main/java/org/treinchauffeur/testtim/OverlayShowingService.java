@@ -1,6 +1,12 @@
 package org.treinchauffeur.testtim;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,6 +17,9 @@ import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -28,11 +37,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import java.util.Date;
 import java.util.List;
 
-public class OverlayShowingService extends Service implements SensorEventListener {
+public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
 
     private Context context;
     private WindowManager mWindowManager;
@@ -62,12 +73,44 @@ public class OverlayShowingService extends Service implements SensorEventListene
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
+        createNotification();
         drawLayout(intent);
         placeView();
         doLocationInfo();
         doSensorInfo();
 
         return START_STICKY;
+    }
+
+    /**
+     * Necessary in order to make service operate in background; when mainactivity is closed
+     */
+    private void createNotification() {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 251, intent, PendingIntent.FLAG_MUTABLE);
+
+        String CHANNEL_ID = "channel_location";
+        String CHANNEL_NAME = "channel_location";
+
+        NotificationCompat.Builder builder = null;
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        notificationManager.createNotificationChannel(channel);
+        builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
+        builder.setChannelId(CHANNEL_ID);
+        builder.setBadgeIconType(NotificationCompat.BADGE_ICON_NONE);
+
+        builder.setContentTitle("TestTim");
+        builder.setContentText("Stays active in background");
+        Uri notificationSound = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION);
+        builder.setSound(notificationSound);
+        builder.setAutoCancel(false);
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        startForeground(251, notification);
     }
 
     private void doSensorInfo() {
@@ -180,6 +223,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     }
                 }
 
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
                 Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
                 TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
@@ -187,12 +240,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
                 TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
 
-                tvLatLong.setText("Lat/long: "+
-                        location.getLatitude() +", "+ location.getLongitude());
-                tvAccuracy.setText("Accuracy: "+location.getAccuracy());
+                tvLatLong.setText("Lat/long: " +
+                        location.getLatitude() + ", " + location.getLongitude());
+                tvAccuracy.setText("Accuracy: " + location.getAccuracy());
 
-                if(location.hasSpeed())
-                tvSpeed.setText("Speed (GPS): "+(int) (location.getSpeed() / 3.6)+" km/h");
+                if (location.hasSpeed())
+                    tvSpeed.setText("Speed (GPS): " + (int) (location.getSpeed() / 3.6) + " km/h");
                 else tvSpeed.setText("Speed (GPS): NaN");
 
                 String fixTypeText = "GNSS fix: ";
@@ -211,46 +264,19 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
             }
         };
-
-        LocationListener locationListener = new LocationListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                //Not sure if necessary, might duplicate calls
-                /*
-                TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
-                TextView tvLatLong = overlayView.findViewById(R.id.tvLatLong);
-                TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
-                TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
-
-                tvLatLong.setText("Lat/long: "+
-                        location.getLatitude() +", "+ location.getLongitude());
-                tvAccuracy.setText("Accuracy: "+location.getAccuracy());
-
-                if(location.hasSpeed())
-                    tvSpeed.setText("Speed: "+location.getSpeed() / 3.6+" km/h");
-                else tvSpeed.setText("Speed: NaN");
-
-                String fixTypeText = "GNSS fix: ";
-                if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    tvFixType.setText(fixTypeText + "None");
-                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
-                } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
-                    tvFixType.setText(fixTypeText + "2D");
-                    tvFixType.setTextColor(Color.parseColor("#FFFF00"));
-                } else if (location.getAltitude() < 200) {
-                    tvFixType.setText(fixTypeText + "3D");
-                    tvFixType.setTextColor(Color.parseColor("#00FF00"));
-                } else {
-                    tvFixType.setText(fixTypeText + "ERROR");
-                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
-                }
-                */
-            }
-        };
-        locationManager.registerGnssStatusCallback(status);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
         locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 500, 1, locationListener);
+                LocationManager.GPS_PROVIDER, 2000, 1, context.getMainExecutor(), this);
     }
 
     @Override
@@ -263,6 +289,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
 
     }
 }

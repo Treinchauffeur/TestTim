@@ -348,6 +348,27 @@
                         android:layout_marginEnd="3dp"
                         android:background="#00CCFF" />
 
+                    <View
+                        android:id="@+id/sat34"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00CCFF" />
+
+                    <View
+                        android:id="@+id/sat35"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00CCFF" />
+
+                    <View
+                        android:id="@+id/sat36"
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="3dp"
+                        android:background="#00CCFF" />
+
 
                 </LinearLayout>
 
