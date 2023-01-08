@@ -1,29 +1,48 @@
 package org.treinchauffeur.testtim;
 
-import android.view.inputmethod.InputMethodManager;
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.GnssAntennaInfo;
+import android.location.GnssStatus;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.ViewGroup;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.os.IBinder;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class OverlayShowingService extends Service {
+import androidx.annotation.NonNull;
+
+import java.util.Date;
+import java.util.List;
+
+public class OverlayShowingService extends Service implements SensorEventListener {
 
     private Context context;
     private WindowManager mWindowManager;
-    private View mView;
+    private View overlayView;
+    private LocationManager locationManager;
+    private WindowManager.LayoutParams mWindowsParams;
+    private GnssStatus.Callback status;
+    private SensorManager sensorManager;
+    private Sensor sensor;
+    public static final String TAG = "OverLayService";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -39,145 +58,59 @@ public class OverlayShowingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
-        allAboutLayout(intent);
-        moveView();
+        drawLayout(intent);
+        placeView();
+        doLocationInfo();
+        doSensorInfo();
 
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
+    }
+
+    private void doSensorInfo() {
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onDestroy() {
 
-        if (mView != null) {
-            mWindowManager.removeView(mView);
+        if (overlayView != null) {
+            mWindowManager.removeView(overlayView);
         }
         super.onDestroy();
     }
 
-    WindowManager.LayoutParams mWindowsParams;
-
-    private void moveView() {
+    private void placeView() {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int width = (int) (metrics.widthPixels * 0.7f);
-        int height = (int) (metrics.heightPixels * 0.45f);
+        int height = (int) (metrics.heightPixels * 0.7f);
 
         mWindowsParams = new WindowManager.LayoutParams(
                 width,
                 height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.OPAQUE);
+                PixelFormat.TRANSLUCENT);
 
 
-        mWindowsParams.gravity = Gravity.TOP | Gravity.LEFT;
-        mWindowsParams.y = 100;
-        mWindowManager.addView(mView, mWindowsParams);
+        mWindowsParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        mWindowsParams.x = 30;
+        mWindowsParams.y = 30;
+        mWindowManager.addView(overlayView, mWindowsParams);
 
-        mView.setOnTouchListener(new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
 
-            long startTime = System.currentTimeMillis();
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (System.currentTimeMillis() - startTime <= 300) {
-                    return false;
-                }
-                if (isViewInBounds(mView, (int) (event.getRawX()), (int) (event.getRawY()))) {
-                    editTextReceiveFocus();
-                } else {
-                    editTextDontReceiveFocus();
-                }
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = mWindowsParams.x;
-                        initialY = mWindowsParams.y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        mWindowsParams.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        mWindowsParams.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        mWindowManager.updateViewLayout(mView, mWindowsParams);
-                        break;
-                }
-                return false;
-            }
-        });
     }
 
-    private boolean isViewInBounds(View view, int x, int y) {
-        Rect outRect = new Rect();
-        int[] location = new int[2];
-        view.getDrawingRect(outRect);
-        view.getLocationOnScreen(location);
-        outRect.offset(location[0], location[1]);
-        return outRect.contains(x, y);
-    }
 
-    private void editTextReceiveFocus() {
-        if (!wasInFocus) {
-            mWindowsParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-            mWindowManager.updateViewLayout(mView, mWindowsParams);
-            wasInFocus = true;
-        }
-    }
-
-    private void editTextDontReceiveFocus() {
-        if (wasInFocus) {
-            mWindowsParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-            mWindowManager.updateViewLayout(mView, mWindowsParams);
-            wasInFocus = false;
-            hideKeyboard(context, edt1);
-        }
-    }
-
-    private boolean wasInFocus = true;
-    private EditText edt1;
-
-    private void allAboutLayout(Intent intent) {
+    private void drawLayout(Intent intent) {
 
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mView = layoutInflater.inflate(R.layout.overlay_window, null);
-
-        edt1 = (EditText) mView.findViewById(R.id.edt1);
-        final TextView tvValue = (TextView) mView.findViewById(R.id.tvValue);
-        Button btnClose = (Button) mView.findViewById(R.id.btnClose);
-
-        edt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mWindowsParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-                mWindowsParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
-                mWindowManager.updateViewLayout(mView, mWindowsParams);
-                wasInFocus = true;
-                showSoftKeyboard(v);
-            }
-        });
-
-        edt1.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                tvValue.setText(edt1.getText());
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+        overlayView = layoutInflater.inflate(R.layout.overlay_window, null);
+        TextView btnClose = overlayView.findViewById(R.id.btnClose);
+        TextView btnRec = overlayView.findViewById(R.id.btnRec);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,22 +119,150 @@ public class OverlayShowingService extends Service {
             }
         });
 
+        btnRec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO Doesn't work.. frustratingly..
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.smartcapture");
+                startActivity(launchIntent);
+            }
+        });
+
     }
 
 
-    private void hideKeyboard(Context context, View view) {
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    private void doLocationInfo() {
+        ViewGroup graph = overlayView.findViewById(R.id.signalStrengthGraph);
+        status = new GnssStatus.Callback() {
+            @Override
+            public void onStarted() {
+                super.onStarted();
+            }
+
+            @Override
+            public void onStopped() {
+                super.onStopped();
+            }
+
+            @Override
+            public void onFirstFix(int ttffMillis) {
+                super.onFirstFix(ttffMillis);
+            }
+
+            @Override
+            public void onSatelliteStatusChanged(@NonNull GnssStatus status) {
+                super.onSatelliteStatusChanged(status);
+
+                //Satellite graph
+                for (int i = 0; i < status.getSatelliteCount(); i++) {
+                    if (graph.getChildAt(i) != null) {
+                        if (status.getCn0DbHz(i) > 0) {
+
+                            //coloring the bars
+                            if (status.getCn0DbHz(i) >= 30)
+                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#00ff00"));
+                            else if (status.getCn0DbHz(i) >= 20 && status.getCn0DbHz(i) < 30)
+                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ffff00"));
+                            else if (status.getCn0DbHz(i) < 20)
+                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
+
+                            //Setting layout height when signal > 0;
+                            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
+                            lp.height = (int) status.getCn0DbHz(i) * 8; //multiplier to fit graph better
+                            graph.getChildAt(i).setLayoutParams(lp);
+                        } else {
+                            //if signal 0, red graph bar & zero height
+                            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
+                            lp.height = 1;
+                            graph.getChildAt(i).setLayoutParams(lp);
+                            graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
+                        }
+                    }
+                }
+
+                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
+                TextView tvLatLong = overlayView.findViewById(R.id.tvLatLong);
+                TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
+                TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
+
+                tvLatLong.setText("Lat/long: "+
+                        location.getLatitude() +", "+ location.getLongitude());
+                tvAccuracy.setText("Accuracy: "+location.getAccuracy());
+
+                if(location.hasSpeed())
+                tvSpeed.setText("Speed (GPS): "+(int) (location.getSpeed() / 3.6)+" km/h");
+                else tvSpeed.setText("Speed (GPS): NaN");
+
+                String fixTypeText = "GNSS fix: ";
+                if ((System.currentTimeMillis() - location.getTime()) > 2000) {
+                    tvFixType.setText(fixTypeText + "None");
+                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
+                    tvFixType.setText(fixTypeText + "2D");
+                    tvFixType.setTextColor(Color.parseColor("#FFFF00"));
+                } else if (location.getAltitude() < 200) {
+                    tvFixType.setText(fixTypeText + "3D");
+                    tvFixType.setTextColor(Color.parseColor("#00FF00"));
+                } else {
+                    tvFixType.setText(fixTypeText + "ERROR");
+                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                }
+            }
+        };
+
+        LocationListener locationListener = new LocationListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                //Not sure if necessary, might duplicate calls
+                /*
+                TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
+                TextView tvLatLong = overlayView.findViewById(R.id.tvLatLong);
+                TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
+                TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
+
+                tvLatLong.setText("Lat/long: "+
+                        location.getLatitude() +", "+ location.getLongitude());
+                tvAccuracy.setText("Accuracy: "+location.getAccuracy());
+
+                if(location.hasSpeed())
+                    tvSpeed.setText("Speed: "+location.getSpeed() / 3.6+" km/h");
+                else tvSpeed.setText("Speed: NaN");
+
+                String fixTypeText = "GNSS fix: ";
+                if ((System.currentTimeMillis() - location.getTime()) > 2000) {
+                    tvFixType.setText(fixTypeText + "None");
+                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
+                    tvFixType.setText(fixTypeText + "2D");
+                    tvFixType.setTextColor(Color.parseColor("#FFFF00"));
+                } else if (location.getAltitude() < 200) {
+                    tvFixType.setText(fixTypeText + "3D");
+                    tvFixType.setTextColor(Color.parseColor("#00FF00"));
+                } else {
+                    tvFixType.setText(fixTypeText + "ERROR");
+                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                }
+                */
+            }
+        };
+        locationManager.registerGnssStatusCallback(status);
+        locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 500, 1, locationListener);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        TextView tvAccel = overlayView.findViewById(R.id.tvAccel);
+        if(sensorEvent.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+            tvAccel.setText(""+ sensorEvent.values[0]);
         }
     }
 
-    public void showSoftKeyboard(View view) {
-        if (view.requestFocus()) {
-            InputMethodManager imm = (InputMethodManager)
-                    getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
-        }
-    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
 }
