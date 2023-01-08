@@ -1,7 +1,6 @@
 package org.treinchauffeur.testtim;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,16 +11,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.GnssAntennaInfo;
 import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.app.Service;
 import android.content.Context;
@@ -44,9 +39,6 @@ import com.jjoe64.graphview.*;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.util.Date;
-import java.util.List;
-
 public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
 
     private Context context;
@@ -59,7 +51,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private Sensor sensor;
     public static final String TAG = "OverLayService";
 
-    private GraphView mGraphAccel;
+    private GraphView graphAccel;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
 
@@ -123,19 +115,25 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private void doSensorInfo() {
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mGraphAccel = initGraph(R.id.graphAccel, "Sensor.TYPE_ACCELEROMETER");
+        graphAccel = initGraph(R.id.graphAccel, "Accelerometer");
+        graphAccel.setTitleColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().reloadStyles();
 
-        // ACCEL
         mSeriesAccelX = initSeries(Color.BLUE, "X");
         mSeriesAccelY = initSeries(Color.RED, "Y");
         mSeriesAccelZ = initSeries(Color.GREEN, "Z");
 
-        mGraphAccel.addSeries(mSeriesAccelX);
-        mGraphAccel.addSeries(mSeriesAccelY);
-        mGraphAccel.addSeries(mSeriesAccelZ);
+        graphAccel.addSeries(mSeriesAccelX);
+        graphAccel.addSeries(mSeriesAccelY);
+        graphAccel.addSeries(mSeriesAccelZ);
 
         startAccel();
-
     }
 
     @Override
@@ -302,16 +300,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        TextView tvAccel = overlayView.findViewById(R.id.tvAccel);
-        if(event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            tvAccel.setText(""+ event.values[0]);
-        }
 
         if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             graphLastAccelXValue += 0.15d;
-            mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, event.values[0]), true, 33);
-            mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, event.values[1]), true, 33);
-            mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, event.values[2]), true, 33);
+            int multiplier = 3;
+            mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, event.values[0] * multiplier), true, 33);
+            mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, event.values[1] * multiplier), true, 33);
+            mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, event.values[2] * multiplier), true, 33);
         }
 
     }
@@ -354,7 +349,4 @@ public class OverlayShowingService extends Service implements SensorEventListene
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
-
-
-
 }
