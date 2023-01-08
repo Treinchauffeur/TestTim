@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mActivity = this;
-        TextView tvValue = (TextView) findViewById(R.id.tvValue);
         Button btnStartService = (Button) findViewById(R.id.btnStartService);
         Button btnClose = (Button) findViewById(R.id.btnClose);
 

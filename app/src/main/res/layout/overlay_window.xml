@@ -4,7 +4,7 @@
     android:id="@+id/activity_main"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#22000000"
+    android:background="#66000000"
     android:paddingLeft="16dp"
     android:paddingTop="16dp"
     android:paddingRight="16dp"
@@ -401,21 +401,14 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <View
-                android:layout_width="150dp"
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/graphAccel"
+                android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:layout_marginVertical="10dp"
                 android:background="#11ffffff"
                 android:gravity="bottom"
                 android:padding="10dp" />
-
-            <View
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_margin="10dp"
-                android:layout_marginVertical="10dp"
-                android:background="#11ffffff"
-                android:gravity="bottom" />
         </LinearLayout>
 
     </LinearLayout>
