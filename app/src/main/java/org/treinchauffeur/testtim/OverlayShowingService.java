@@ -71,7 +71,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         createNotification();
         drawLayout(intent);
@@ -115,7 +115,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private void doSensorInfo() {
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        graphAccel = initGraph(R.id.graphAccel, "Accelerometer");
+        graphAccel = initGraph(R.id.graphAccel, "m/s^2");
         graphAccel.setTitleColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
@@ -124,6 +124,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().reloadStyles();
+
 
         mSeriesAccelX = initSeries(Color.BLUE, "X");
         mSeriesAccelY = initSeries(Color.RED, "Y");
