@@ -3,12 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="#66000000"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
+    android:padding="10dp"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -18,26 +15,39 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/btnHide"
+            android:layout_width="50dp"
+            android:layout_height="25dp"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="HIDE"
+            android:textColor="@color/white"
+            android:textSize="12dp" />
+
+        <TextView
             android:id="@+id/btnRec"
             android:layout_width="50dp"
             android:layout_height="25dp"
-            android:gravity="center"
-            android:text="REC"
             android:clickable="true"
-            android:textColor="#FF0000" />
+            android:gravity="center"
+
+            android:text="REC"
+            android:textColor="#FF0000"
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/btnClose"
             android:layout_width="25dp"
             android:layout_height="25dp"
+            android:clickable="true"
             android:gravity="center"
             android:text="X"
-            android:clickable="true"/>
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <TextView
@@ -46,7 +56,7 @@
             android:layout_height="wrap_content"
             android:text="TestTim "
             android:textColor="@color/white"
-            android:textSize="22dp"
+            android:textSize="16dp"
             android:textStyle="bold" />
 
         <TextView
@@ -56,7 +66,9 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tvTitle"
             android:text="v1.0.0"
-            android:textColor="@color/white" />
+
+            android:textColor="@color/white"
+            android:textSize="10dp" />
 
         <TextView
             android:id="@+id/tvFixType"
@@ -65,21 +77,25 @@
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:text="GNSS fix: NaN"
-            android:textColor="#FF0000" />
+            android:textColor="#FF0000"
+            android:textSize="12dp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvLatLong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lat/long: NaN, NaN"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/tvAccuracy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Accuracy: NaN"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/tvSpeed"
@@ -87,322 +103,340 @@
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:text="Speed: NaN"
-            android:textSize="18dp"
-            android:textColor="@color/white" />
-
-        <TextView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="Signal strength"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="12dp"
+            android:textStyle="bold" />
 
         <LinearLayout
-            android:layout_width="340dp"
-            android:layout_height="150dp"
-            android:background="#11ffffff"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-
-            <HorizontalScrollView
-                android:id="@+id/signalStrengthScrollView"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:scrollbars="none">
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:text="Per-satellite S.N.R."
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
 
                 <LinearLayout
-                    android:id="@+id/signalStrengthGraph"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="bottom"
+                    android:background="#11ffffff"
+                    android:gravity="center_horizontal"
                     android:orientation="horizontal">
 
 
-                    <View
-                        android:id="@+id/sat1"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat2"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat3"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat4"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat5"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat6"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat7"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat8"
-                        android:layout_width="8dp"
-                        android:layout_height="10dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
-
-                    <View
-                        android:id="@+id/sat9"
-                        android:layout_width="8dp"
-                        android:layout_height="40dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#FFFF00" />
-
-                    <View
-                        android:id="@+id/sat10"
-                        android:layout_width="8dp"
+                    <HorizontalScrollView
+                        android:id="@+id/signalStrengthScrollView"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00FF00" />
+                        android:scrollbars="none">
 
-                    <View
-                        android:id="@+id/sat11"
-                        android:layout_width="8dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00FF00" />
+                        <LinearLayout
+                            android:id="@+id/signalStrengthGraph"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="bottom"
+                            android:orientation="horizontal">
 
-                    <View
-                        android:id="@+id/sat12"
-                        android:layout_width="8dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00FF00" />
 
-                    <View
-                        android:id="@+id/sat13"
-                        android:layout_width="8dp"
-                        android:layout_height="70dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#FFFF00" />
+                            <View
+                                android:id="@+id/sat1"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat14"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat2"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat15"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat3"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat16"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat4"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat17"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat5"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat18"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat6"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat19"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat7"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat20"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat8"
+                                android:layout_width="4dp"
+                                android:layout_height="10dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat21"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat9"
+                                android:layout_width="4dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#FFFF00" />
 
-                    <View
-                        android:id="@+id/sat22"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat10"
+                                android:layout_width="4dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="2dp"
+                                android:background="#00FF00" />
 
-                    <View
-                        android:id="@+id/sat23"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat11"
+                                android:layout_width="4dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="2dp"
+                                android:background="#00FF00" />
 
-                    <View
-                        android:id="@+id/sat24"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat12"
+                                android:layout_width="4dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="2dp"
+                                android:background="#00FF00" />
 
-                    <View
-                        android:id="@+id/sat25"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat13"
+                                android:layout_width="4dp"
+                                android:layout_height="70dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#FFFF00" />
 
-                    <View
-                        android:id="@+id/sat26"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat14"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat27"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat15"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat28"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat16"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat29"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat17"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat30"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat18"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat31"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat19"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat32"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#ff0000" />
+                            <View
+                                android:id="@+id/sat20"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat33"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00CCFF" />
+                            <View
+                                android:id="@+id/sat21"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat34"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00CCFF" />
+                            <View
+                                android:id="@+id/sat22"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat35"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00CCFF" />
+                            <View
+                                android:id="@+id/sat23"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
 
-                    <View
-                        android:id="@+id/sat36"
-                        android:layout_width="8dp"
-                        android:layout_height="1dp"
-                        android:layout_marginEnd="3dp"
-                        android:background="#00CCFF" />
+                            <View
+                                android:id="@+id/sat24"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat25"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat26"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat27"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat28"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat29"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat30"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat31"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat32"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat33"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat34"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat35"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+                            <View
+                                android:id="@+id/sat36"
+                                android:layout_width="4dp"
+                                android:layout_height="1dp"
+                                android:layout_marginEnd="2dp"
+                                android:background="#ff0000" />
+
+
+                        </LinearLayout>
+
+                    </HorizontalScrollView>
 
 
                 </LinearLayout>
+            </LinearLayout>
 
-            </HorizontalScrollView>
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="5dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:text="Accelerometer"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <com.jjoe64.graphview.GraphView
+                    android:id="@+id/graphAccel"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="-60dp"
+                    android:background="#11ffffff"
+                    android:gravity="bottom" />
+            </LinearLayout>
 
         </LinearLayout>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:text="Accelerometer"
-            android:textColor="@color/white" />
-
-        <LinearLayout
-            android:layout_width="340dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <com.jjoe64.graphview.GraphView
-                android:id="@+id/graphAccel"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="#11ffffff"
-                android:gravity="bottom" />
-        </LinearLayout>
-
     </LinearLayout>
 
 

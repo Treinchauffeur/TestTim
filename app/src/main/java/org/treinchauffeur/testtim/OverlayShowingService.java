@@ -77,7 +77,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         drawLayout(intent);
         placeView();
         doLocationInfo();
-        doSensorInfo();
+        doGraphSetup();
 
         return START_STICKY;
     }
@@ -90,8 +90,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 251, intent, PendingIntent.FLAG_MUTABLE);
 
-        String CHANNEL_ID = "channel_location";
-        String CHANNEL_NAME = "channel_location";
+        String CHANNEL_ID = "Persistence";
+        String CHANNEL_NAME = "Persistent notification";
 
         NotificationCompat.Builder builder = null;
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -113,10 +113,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
         startForeground(251, notification);
     }
 
-    private void doSensorInfo() {
+    private void doGraphSetup() {
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         graphAccel = initGraph(R.id.graphAccel, "m/s^2");
+        graphAccel.getLegendRenderer().setVisible(false);
         graphAccel.setTitleColor(Color.WHITE);
+        graphAccel.setTitleTextSize(8);
+        graphAccel.getGridLabelRenderer().setTextSize(12);
         graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
@@ -148,8 +151,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private void placeView() {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        int width = (int) (metrics.widthPixels * 0.7f);
-        int height = (int) (metrics.heightPixels * 0.7f);
+        int width = 534;
+        int height = 400;
 
         mWindowsParams = new WindowManager.LayoutParams(
                 width,
@@ -185,8 +188,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         btnRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO Doesn't work.. frustratingly..
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.smartcapture");
+                //TODO Doesn't work..
+                // I don't think there is a way to do this properly. Might have to do this in-app...
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
                 startActivity(launchIntent);
             }
         });
@@ -224,19 +228,20 @@ public class OverlayShowingService extends Service implements SensorEventListene
                             //coloring the bars
                             if (status.getCn0DbHz(i) >= 30)
                                 graph.getChildAt(i).setBackgroundColor(Color.parseColor("#00ff00"));
-                            else if (status.getCn0DbHz(i) >= 20 && status.getCn0DbHz(i) < 30)
+                            else if (status.getCn0DbHz(i) >= 15 && status.getCn0DbHz(i) < 30)
                                 graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ffff00"));
-                            else if (status.getCn0DbHz(i) < 20)
+                            else if (status.getCn0DbHz(i) < 15)
                                 graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
 
                             //Setting layout height when signal > 0;
                             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
-                            lp.height = (int) status.getCn0DbHz(i) * 8; //multiplier to fit graph better
+                            lp.height = (int) (graph.getHeight() * (status.getCn0DbHz(i) / 45));
+
                             graph.getChildAt(i).setLayoutParams(lp);
                         } else {
                             //if signal 0, red graph bar & zero height
                             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
-                            lp.height = 1;
+                            lp.height = 2;
                             graph.getChildAt(i).setLayoutParams(lp);
                             graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
                         }
@@ -262,7 +267,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                 tvLatLong.setText("Lat/long: " +
                         location.getLatitude() + ", " + location.getLongitude());
-                tvAccuracy.setText("Accuracy: " + location.getAccuracy());
+                tvAccuracy.setText("Accuracy: " + (int) location.getAccuracy() + "m");
+
+                if (location.getAccuracy() > 50)
+                    tvAccuracy.setTextColor(Color.parseColor("#FF0000"));
+                else
+                    tvAccuracy.setTextColor(Color.WHITE);
 
                 if (location.hasSpeed())
                     tvSpeed.setText("Speed (GPS): " + (int) (location.getSpeed() / 3.6) + " km/h");
@@ -270,7 +280,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                 String fixTypeText = "GNSS fix: ";
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    tvFixType.setText(fixTypeText + "None");
+                    tvFixType.setText(fixTypeText + "None; fix data too old");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                 } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
                     tvFixType.setText(fixTypeText + "2D");
@@ -328,10 +338,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graph.getViewport().setMinX(0);
         graph.getViewport().setMaxX(5);
         graph.getGridLabelRenderer().setLabelVerticalWidth(100);
-        graph.setTitle(title);
         graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         graph.getLegendRenderer().setVisible(true);
-        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
         return graph;
     }
 
@@ -339,6 +347,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         LineGraphSeries<DataPoint> series;
         series = new LineGraphSeries<>();
         series.setDrawDataPoints(true);
+        series.setDataPointsRadius(1);
         series.setDrawBackground(false);
         series.setColor(color);
         series.setTitle(title);
