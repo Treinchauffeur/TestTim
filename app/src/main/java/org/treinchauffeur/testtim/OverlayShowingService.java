@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -57,6 +58,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private GraphView graphAccel;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
+    private boolean placedLeft = false;
 
 
     private float speed = 0, speedKmh = 0;
@@ -144,6 +146,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.addSeries(mSeriesAccelY);
         graphAccel.addSeries(mSeriesAccelZ);
 
+        graphAccel.getViewport().setMinY(-3.0);
+        graphAccel.getViewport().setMaxY(3.0);
+        graphAccel.getViewport().setYAxisBoundsManual(true);
+
         startAccel();
     }
 
@@ -224,6 +230,27 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 //startActivity(launchIntent);
                 chronometer.setTextColor(Color.RED); //for now..
                 Toast.makeText(context, "Doesn't work yet, just counts..", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //Tablet placement in cab, inverts accelerometer outputs
+        TextView btnLeft = overlayView.findViewById(R.id.placedLeft);
+        TextView btnRight = overlayView.findViewById(R.id.placedRight);
+
+        btnLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnLeft.setTextColor(Color.WHITE);
+                btnRight.setTextColor(Color.parseColor("#888888"));
+                placedLeft = true;
+            }
+        });
+        btnRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnLeft.setTextColor(Color.parseColor("#888888"));
+                btnRight.setTextColor(Color.WHITE);
+                placedLeft = false;
             }
         });
 
@@ -373,14 +400,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
     }
 
     int counter = 0;
-    float[] data = new float[3];
+    float[] data = new float[4];
+    float input = 0;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            data[counter] = event.values[1];
-            if (counter == 2) {
-                float average = (data[0] + data[1] + data[2]) / 6;
+            input = placedLeft ? (event.values[1] * -1) : event.values[1];
+            data[counter] = input;
+            if (counter == 3) {
+                float average = (data[0] + data[1] + data[2] + data[3]) / 4;
                 graphLastAccelXValue += 0.15d;
                 int multiplier = 3;
                 mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
