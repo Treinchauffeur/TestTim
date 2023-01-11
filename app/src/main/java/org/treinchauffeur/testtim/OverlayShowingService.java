@@ -17,6 +17,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.app.Service;
 import android.content.Context;
@@ -28,8 +29,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Chronometer;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -54,6 +57,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private GraphView graphAccel;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
+
+
+    private float speed = 0, speedKmh = 0;
+    private boolean hasGPSFix;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -129,9 +136,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.getGridLabelRenderer().reloadStyles();
 
 
-        mSeriesAccelX = initSeries(Color.BLUE, "X");
-        mSeriesAccelY = initSeries(Color.RED, "Y");
-        mSeriesAccelZ = initSeries(Color.GREEN, "Z");
+        mSeriesAccelX = initSeries(Color.BLACK, "X"); //back and forth
+        mSeriesAccelY = initSeries(Color.RED, "Y");//side to side
+        mSeriesAccelZ = initSeries(Color.BLACK, "Z"); //up and down
 
         graphAccel.addSeries(mSeriesAccelX);
         graphAccel.addSeries(mSeriesAccelY);
@@ -167,7 +174,29 @@ public class OverlayShowingService extends Service implements SensorEventListene
         mWindowsParams.y = 30;
         mWindowManager.addView(overlayView, mWindowsParams);
 
+        TextView tvMove = overlayView.findViewById(R.id.btnMove);
+        final boolean[] posLeftBtm = {true};
 
+        tvMove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (posLeftBtm[0]) {
+                    Log.d(TAG, "test");
+                    mWindowsParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                    mWindowsParams.x = 30;
+                    mWindowsParams.y = 100;
+                    mWindowManager.updateViewLayout(overlayView, mWindowsParams);
+                    posLeftBtm[0] = false;
+                } else {
+                    Log.d(TAG, "test2");
+                    mWindowsParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+                    mWindowsParams.x = 30;
+                    mWindowsParams.y = 30;
+                    mWindowManager.updateViewLayout(overlayView, mWindowsParams);
+                    posLeftBtm[0] = true;
+                }
+            }
+        });
     }
 
 
@@ -185,13 +214,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
             }
         });
 
+        Chronometer chronometer = overlayView.findViewById(R.id.tvRec);
         btnRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO Doesn't work..
-                // I don't think there is a way to do this properly. Might have to do this in-app...
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
-                startActivity(launchIntent);
+                chronometer.start();
+                //TODO everything below.. Probably have to start figuring out local recording.
+                //Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
+                //startActivity(launchIntent);
+                chronometer.setTextColor(Color.RED); //for now..
+                Toast.makeText(context, "Doesn't work yet, just counts..", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -200,6 +232,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private void doLocationInfo() {
         ViewGroup graph = overlayView.findViewById(R.id.signalStrengthGraph);
+        TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
+        TextView tvLatLong = overlayView.findViewById(R.id.tvLatLong);
+        TextView tvElevation = overlayView.findViewById(R.id.tvElevation);
+        TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
+        TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
+        TextView tvHideGraph = overlayView.findViewById(R.id.graphHider);
         status = new GnssStatus.Callback() {
             @Override
             public void onStarted() {
@@ -260,28 +298,17 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
                 Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-                TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
-                TextView tvLatLong = overlayView.findViewById(R.id.tvLatLong);
-                TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
-                TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
 
-                tvLatLong.setText("Lat/long: " +
-                        location.getLatitude() + ", " + location.getLongitude());
-                tvAccuracy.setText("Accuracy: " + (int) location.getAccuracy() + "m");
-
-                if (location.getAccuracy() > 50)
-                    tvAccuracy.setTextColor(Color.parseColor("#FF0000"));
-                else
-                    tvAccuracy.setTextColor(Color.WHITE);
-
-                if (location.hasSpeed())
-                    tvSpeed.setText("Speed (GPS): " + (int) (location.getSpeed() / 3.6) + " km/h");
-                else tvSpeed.setText("Speed (GPS): NaN");
-
+                hasGPSFix = true;
                 String fixTypeText = "GNSS fix: ";
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    tvFixType.setText(fixTypeText + "None; fix data too old");
+                    tvFixType.setText(fixTypeText + "false; fix data too old");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                    tvLatLong.setTextColor(Color.parseColor("#88FFFFFF"));
+                    tvElevation.setTextColor(Color.parseColor("#88FFFFFF"));
+                    tvAccuracy.setTextColor(Color.parseColor("#88FFFFFF"));
+                    tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
+                    hasGPSFix = false;
                 } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
                     tvFixType.setText(fixTypeText + "2D");
                     tvFixType.setTextColor(Color.parseColor("#FFFF00"));
@@ -292,6 +319,42 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     tvFixType.setText(fixTypeText + "ERROR");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                 }
+
+                if (hasGPSFix) {
+                    tvLatLong.setTextColor(Color.WHITE);
+                    tvLatLong.setText("Lat/long: " +
+                            location.getLatitude() + ", " + location.getLongitude());
+
+                    if (location.hasAltitude()) {
+                        tvElevation.setText("Elevation: " + (int) location.getAltitude() + "m");
+                        if (location.getAltitude() >= 200)
+                            tvElevation.setTextColor(Color.parseColor("#FF0000"));
+                        else
+                            tvElevation.setTextColor(Color.WHITE);
+
+                    }
+                    tvAccuracy.setText("Accuracy: " + (int) location.getAccuracy() + "m");
+
+                    if (location.getAccuracy() > 50)
+                        tvAccuracy.setTextColor(Color.parseColor("#FF0000"));
+                    else
+                        tvAccuracy.setTextColor(Color.WHITE);
+
+                    if (location.hasSpeed()) {
+                        if (speed > 5) {
+                            tvHideGraph.setVisibility(View.VISIBLE);
+                        } else {
+                            tvHideGraph.setVisibility(View.GONE);
+                        }
+                        setSpeed(location.getSpeed());
+                        tvSpeed.setText("Speed (GPS): " + speed + " m/s");
+                        tvSpeed.setTextColor(Color.WHITE);
+                    } else {
+                        tvHideGraph.setVisibility(View.GONE);
+                        tvSpeed.setText("Speed (GPS): NaN");
+                        tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
+                    }
+                } else tvHideGraph.setVisibility(View.GONE);
             }
         };
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -309,15 +372,24 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 LocationManager.GPS_PROVIDER, 2000, 1, context.getMainExecutor(), this);
     }
 
+    int counter = 0;
+    float[] data = new float[3];
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-
-        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            graphLastAccelXValue += 0.15d;
-            int multiplier = 3;
-            mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, event.values[0] * multiplier), true, 33);
-            mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, event.values[1] * multiplier), true, 33);
-            mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, event.values[2] * multiplier), true, 33);
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            data[counter] = event.values[1];
+            if (counter == 2) {
+                float average = (data[0] + data[1] + data[2]) / 6;
+                graphLastAccelXValue += 0.15d;
+                int multiplier = 3;
+                mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
+                mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, average * multiplier), true, 33);
+                mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
+                counter = 0;
+                return;
+            }
+            counter++;
         }
 
     }
@@ -354,9 +426,14 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return series;
     }
 
-    public void startAccel(){
+    public void startAccel() {
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+        this.speedKmh = (float) (speed / 3.6);
     }
 }

@@ -9,18 +9,19 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/topBtns"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/btnHide"
+            android:id="@+id/btnMove"
             android:layout_width="50dp"
             android:layout_height="25dp"
             android:clickable="true"
             android:gravity="center"
-            android:text="HIDE"
+            android:text="MOVE"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -30,7 +31,6 @@
             android:layout_height="25dp"
             android:clickable="true"
             android:gravity="center"
-
             android:text="REC"
             android:textColor="#FF0000"
             android:textSize="12dp" />
@@ -44,6 +44,17 @@
             android:text="X"
             android:textColor="@color/white" />
     </LinearLayout>
+
+    <Chronometer
+        android:id="@+id/tvRec"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_below="@+id/topBtns"
+        android:layout_alignParentRight="true"
+        android:clickable="true"
+        android:gravity="center"
+        android:textColor="#88FFFFFF"
+        android:textSize="12dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -86,6 +97,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lat/long: NaN, NaN"
+            android:textColor="@color/white"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/tvElevation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Elevation: NaN"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -416,8 +435,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="5dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingStart="5dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -427,13 +446,32 @@
                     android:textColor="@color/white"
                     android:textSize="12dp" />
 
-                <com.jjoe64.graphview.GraphView
-                    android:id="@+id/graphAccel"
+                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="-60dp"
-                    android:background="#11ffffff"
-                    android:gravity="bottom" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/graphHider"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#88000000"
+                        android:elevation="5dp"
+                        android:gravity="center"
+                        android:text="V > 5 m/s"
+                        android:textColor="@color/white" />
+
+                    <com.jjoe64.graphview.GraphView
+                        android:id="@+id/graphAccel"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="-60dp"
+                        android:background="#11ffffff"
+                        android:gravity="bottom" />
+
+                </RelativeLayout>
+
+
             </LinearLayout>
 
         </LinearLayout>
