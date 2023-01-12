@@ -140,7 +140,7 @@
                 android:layout_height="25dp"
                 android:clickable="true"
                 android:gravity="center"
-                android:text="Tablet placement in cab:"
+                android:text="Placement in cab:"
                 android:textColor="@color/white"
                 android:textSize="12dp" />
 
@@ -499,7 +499,7 @@
                         android:background="#88000000"
                         android:elevation="5dp"
                         android:gravity="center"
-                        android:text="V > 5 m/s"
+                        android:text="Train is moving"
                         android:textColor="@color/white" />
 
                     <com.jjoe64.graphview.GraphView

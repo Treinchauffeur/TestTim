@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -43,6 +42,8 @@ import com.jjoe64.graphview.*;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.Iterator;
+
 public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
 
     private Context context;
@@ -59,6 +60,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
     private boolean placedLeft = false;
+    private TextView graphHider;
+    double accelerometerThreshold = 0;
+    int viewport;
 
 
     private float speed = 0, speedKmh = 0;
@@ -80,7 +84,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
+        viewport = intent.getIntExtra("viewport", 2);
+        Log.d(TAG, "" + accelerometerThreshold);
+
 
         createNotification();
         drawLayout(intent);
@@ -146,8 +154,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.addSeries(mSeriesAccelY);
         graphAccel.addSeries(mSeriesAccelZ);
 
-        graphAccel.getViewport().setMinY(-3.0);
-        graphAccel.getViewport().setMaxY(3.0);
+        graphAccel.getViewport().setMinY((double) viewport * -1);
+        graphAccel.getViewport().setMaxY((double) viewport);
         graphAccel.getViewport().setYAxisBoundsManual(true);
 
         startAccel();
@@ -212,6 +220,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         overlayView = layoutInflater.inflate(R.layout.overlay_window, null);
         TextView btnClose = overlayView.findViewById(R.id.btnClose);
         TextView btnRec = overlayView.findViewById(R.id.btnRec);
+        graphHider = overlayView.findViewById(R.id.graphHider);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,7 +273,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView tvElevation = overlayView.findViewById(R.id.tvElevation);
         TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
         TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
-        TextView tvHideGraph = overlayView.findViewById(R.id.graphHider);
+        //TextView tvHideGraph = overlayView.findViewById(R.id.graphHider);
         status = new GnssStatus.Callback() {
             @Override
             public void onStarted() {
@@ -368,20 +377,14 @@ public class OverlayShowingService extends Service implements SensorEventListene
                         tvAccuracy.setTextColor(Color.WHITE);
 
                     if (location.hasSpeed()) {
-                        if (speed > 5) {
-                            tvHideGraph.setVisibility(View.VISIBLE);
-                        } else {
-                            tvHideGraph.setVisibility(View.GONE);
-                        }
                         setSpeed(location.getSpeed());
-                        tvSpeed.setText("Speed (GPS): " + speed + " m/s");
+                        tvSpeed.setText("Speed (GPS): " + speedKmh + " km/h");
                         tvSpeed.setTextColor(Color.WHITE);
                     } else {
-                        tvHideGraph.setVisibility(View.GONE);
                         tvSpeed.setText("Speed (GPS): NaN");
                         tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
                     }
-                } else tvHideGraph.setVisibility(View.GONE);
+                }
             }
         };
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -396,20 +399,25 @@ public class OverlayShowingService extends Service implements SensorEventListene
         }
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
         locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 2000, 1, context.getMainExecutor(), this);
+                LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
     }
 
     int counter = 0;
-    float[] data = new float[4];
-    float input = 0;
+    float[] dataToAverage = new float[4];
+    float diagonalAxisInput = 0;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            input = placedLeft ? (event.values[1] * -1) : event.values[1];
-            data[counter] = input;
+        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+
+            //0: up and down
+            //1: side to side
+            //2: back and forth
+
+            diagonalAxisInput = placedLeft ? (event.values[2] - (event.values[1] * -1)) : (event.values[2] - event.values[1]);
+            dataToAverage[counter] = diagonalAxisInput;
             if (counter == 3) {
-                float average = (data[0] + data[1] + data[2] + data[3]) / 4;
+                float average = (dataToAverage[0] + dataToAverage[1] + dataToAverage[2] + dataToAverage[3]) / 4;
                 graphLastAccelXValue += 0.15d;
                 int multiplier = 3;
                 mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
@@ -421,6 +429,27 @@ public class OverlayShowingService extends Service implements SensorEventListene
             counter++;
         }
 
+        //Shows 'train is moving' on graph when acceleration forces are fel, the threshold being supplied by host activity
+        Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 5, mSeriesAccelY.getHighestValueX());
+        double highestYViewable = 0;
+        double lowestYViewable = 0;
+
+        //Hate doing this, but the GraphView library apparently doesn't provide a better way
+        for (Iterator<DataPoint> it = viewableData; it.hasNext(); ) {
+            DataPoint point = it.next();
+            if (point.getY() > highestYViewable)
+                highestYViewable = point.getY();
+            if (point.getY() < lowestYViewable)
+                lowestYViewable = point.getY();
+        }
+
+        if (accelerometerThreshold > 0) {
+            if (highestYViewable - lowestYViewable > accelerometerThreshold) {
+                graphHider.setVisibility(View.VISIBLE);
+            } else {
+                graphHider.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -434,7 +463,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     }
 
     public GraphView initGraph(int id, String title) {
-        GraphView graph = (GraphView) overlayView.findViewById(id);
+        GraphView graph = overlayView.findViewById(id);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
         graph.getViewport().setMaxX(5);
@@ -457,12 +486,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     public void startAccel() {
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void setSpeed(float speed) {
         this.speed = speed;
-        this.speedKmh = (float) (speed / 3.6);
+        this.speedKmh = (float) (speed * 3.6);
     }
 }
