@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -63,6 +64,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private TextView graphHider;
     double accelerometerThreshold = 0;
     int viewport;
+    double xCorrector = 0, yCorrector = 0;
+    float uncorrectedX = 0, uncorrectedY = 0;
+    float finalX = 0, finalY = 0;
+
+    private boolean simpleCalculations = true; //debugging
 
 
     private float speed = 0, speedKmh = 0;
@@ -84,20 +90,23 @@ public class OverlayShowingService extends Service implements SensorEventListene
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
+        simpleCalculations = intent.getBooleanExtra("simpleCalculations", true);
         viewport = intent.getIntExtra("viewport", 2);
         Log.d(TAG, "" + accelerometerThreshold);
 
 
         createNotification();
         drawLayout(intent);
+        setButtonActions();
         placeView();
         doLocationInfo();
         doGraphSetup();
 
         return START_STICKY;
     }
+
 
     /**
      * Necessary in order to make service operate in background; when mainactivity is closed
@@ -130,50 +139,89 @@ public class OverlayShowingService extends Service implements SensorEventListene
         startForeground(251, notification);
     }
 
-    private void doGraphSetup() {
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        graphAccel = initGraph(R.id.graphAccel, "m/s^2");
-        graphAccel.getLegendRenderer().setVisible(false);
-        graphAccel.setTitleColor(Color.WHITE);
-        graphAccel.setTitleTextSize(8);
-        graphAccel.getGridLabelRenderer().setTextSize(12);
-        graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().reloadStyles();
-
-
-        mSeriesAccelX = initSeries(Color.BLACK, "X"); //back and forth
-        mSeriesAccelY = initSeries(Color.RED, "Y");//side to side
-        mSeriesAccelZ = initSeries(Color.BLACK, "Z"); //up and down
-
-        graphAccel.addSeries(mSeriesAccelX);
-        graphAccel.addSeries(mSeriesAccelY);
-        graphAccel.addSeries(mSeriesAccelZ);
-
-        graphAccel.getViewport().setMinY((double) viewport * -1);
-        graphAccel.getViewport().setMaxY((double) viewport);
-        graphAccel.getViewport().setYAxisBoundsManual(true);
-
-        startAccel();
-    }
-
     @Override
     public void onDestroy() {
-
         if (overlayView != null) {
             mWindowManager.removeView(overlayView);
         }
         super.onDestroy();
     }
 
+
+    private void drawLayout(Intent intent) {
+        LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        overlayView = layoutInflater.inflate(R.layout.overlay_window, null);
+    }
+
+    private void setButtonActions() {
+        TextView btnClose = overlayView.findViewById(R.id.btnClose);
+        TextView btnRec = overlayView.findViewById(R.id.btnRec);
+        TextView btnCalibrate = overlayView.findViewById(R.id.calibrate);
+        TextView btnResetCalibration = overlayView.findViewById(R.id.calibrateReset);
+        graphHider = overlayView.findViewById(R.id.graphHider);
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopSelf();
+            }
+        });
+
+        Chronometer chronometer = overlayView.findViewById(R.id.tvRec);
+        btnRec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //chronometer.start(); //Yeahhhhhh let's not
+                //TODO everything below.. Probably have to start figuring out local recording.
+                //Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
+                //startActivity(launchIntent);
+                Toast.makeText(context, "Doesn't work yet, just counts..", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //Tablet placement in cab, inverts accelerometer outputs
+        TextView btnLeft = overlayView.findViewById(R.id.placedLeft);
+        TextView btnRight = overlayView.findViewById(R.id.placedRight);
+
+        btnLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnLeft.setTextColor(Color.WHITE);
+                btnRight.setTextColor(Color.parseColor("#888888"));
+                placedLeft = true;
+            }
+        });
+        btnRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnLeft.setTextColor(Color.parseColor("#888888"));
+                btnRight.setTextColor(Color.WHITE);
+                placedLeft = false;
+            }
+        });
+
+        btnCalibrate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                xCorrector = uncorrectedX;
+                yCorrector = uncorrectedY;
+                btnCalibrate.setTextColor(Color.parseColor("#888888"));
+            }
+        });
+        btnResetCalibration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                xCorrector = 0;
+                yCorrector = 0;
+                btnCalibrate.setTextColor(Color.WHITE);
+            }
+        });
+
+    }
+
     private void placeView() {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int width = 534;
-        int height = 400;
+        int height = 500;
 
         mWindowsParams = new WindowManager.LayoutParams(
                 width,
@@ -181,7 +229,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
-
 
         mWindowsParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
         mWindowsParams.x = 30;
@@ -211,58 +258,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
             }
         });
-    }
-
-
-    private void drawLayout(Intent intent) {
-
-        LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        overlayView = layoutInflater.inflate(R.layout.overlay_window, null);
-        TextView btnClose = overlayView.findViewById(R.id.btnClose);
-        TextView btnRec = overlayView.findViewById(R.id.btnRec);
-        graphHider = overlayView.findViewById(R.id.graphHider);
-
-        btnClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                stopSelf();
-            }
-        });
-
-        Chronometer chronometer = overlayView.findViewById(R.id.tvRec);
-        btnRec.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chronometer.start();
-                //TODO everything below.. Probably have to start figuring out local recording.
-                //Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
-                //startActivity(launchIntent);
-                chronometer.setTextColor(Color.RED); //for now..
-                Toast.makeText(context, "Doesn't work yet, just counts..", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        //Tablet placement in cab, inverts accelerometer outputs
-        TextView btnLeft = overlayView.findViewById(R.id.placedLeft);
-        TextView btnRight = overlayView.findViewById(R.id.placedRight);
-
-        btnLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btnLeft.setTextColor(Color.WHITE);
-                btnRight.setTextColor(Color.parseColor("#888888"));
-                placedLeft = true;
-            }
-        });
-        btnRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btnLeft.setTextColor(Color.parseColor("#888888"));
-                btnRight.setTextColor(Color.WHITE);
-                placedLeft = false;
-            }
-        });
-
     }
 
 
@@ -332,7 +327,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                Location location = null;
+                if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
+                    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                } else {
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
 
 
                 hasGPSFix = true;
@@ -408,13 +408,27 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
             //0: up and down
             //1: side to side
             //2: back and forth
 
-            diagonalAxisInput = placedLeft ? (event.values[2] - (event.values[1] * -1)) : (event.values[2] - event.values[1]);
+            setXY(event.values[1], event.values[2]);
+
+            if (xCorrector != 0) {
+                finalX = (float) (uncorrectedX - xCorrector);
+                finalY = (float) (uncorrectedY - yCorrector);
+            } else {
+                finalX = (float) (uncorrectedX);
+                finalY = (float) (uncorrectedY);
+            }
+
+            if (!simpleCalculations) {
+                diagonalAxisInput = placedLeft ? (finalY - (finalX * -1)) : (finalY - finalX);
+            } else {
+                diagonalAxisInput = finalY;
+            }
             dataToAverage[counter] = diagonalAxisInput;
             if (counter == 3) {
                 float average = (dataToAverage[0] + dataToAverage[1] + dataToAverage[2] + dataToAverage[3]) / 4;
@@ -430,7 +444,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         }
 
         //Shows 'train is moving' on graph when acceleration forces are fel, the threshold being supplied by host activity
-        Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 5, mSeriesAccelY.getHighestValueX());
+        Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 3, mSeriesAccelY.getHighestValueX());
         double highestYViewable = 0;
         double lowestYViewable = 0;
 
@@ -450,6 +464,43 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 graphHider.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void doGraphSetup() {
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        graphAccel = initGraph(R.id.graphAccel, "m/s^2");
+        graphAccel.getLegendRenderer().setVisible(false);
+        graphAccel.setTitleColor(Color.WHITE);
+        graphAccel.setTitleTextSize(8);
+        graphAccel.getGridLabelRenderer().setTextSize(12);
+        graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().reloadStyles();
+
+
+        mSeriesAccelX = initSeries(Color.BLACK, "X"); //back and forth
+        mSeriesAccelY = initSeries(Color.RED, "Y");//side to side
+        mSeriesAccelZ = initSeries(Color.BLACK, "Z"); //up and down
+
+        graphAccel.addSeries(mSeriesAccelX);
+        graphAccel.addSeries(mSeriesAccelY);
+        graphAccel.addSeries(mSeriesAccelZ);
+
+
+        graphAccel.getViewport().setMinY((double) viewport * -1);
+        graphAccel.getViewport().setMaxY((double) viewport);
+        graphAccel.getViewport().setYAxisBoundsManual(true);
+
+        startAccel();
+    }
+
+    private void setXY(float x, float y) {
+        uncorrectedX = x;
+        uncorrectedY = y;
     }
 
     @Override
@@ -485,8 +536,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
     }
 
     public void startAccel() {
-        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 

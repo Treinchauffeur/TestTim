@@ -168,6 +168,35 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/calibrateBtns"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            android:gravity="right">
+
+            <TextView
+                android:id="@+id/calibrate"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:clickable="true"
+                android:gravity="center"
+                android:text="Set calibration"
+                android:textColor="@color/white"
+                android:textSize="12dp" />
+
+            <TextView
+                android:id="@+id/calibrateReset"
+                android:layout_width="50dp"
+                android:layout_height="25dp"
+                android:clickable="true"
+                android:gravity="center"
+                android:text="Reset"
+                android:textColor="@color/white"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"

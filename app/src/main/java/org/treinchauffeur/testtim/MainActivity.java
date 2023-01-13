@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     double threshold = 0;
     int viewport = 0;
     OverlayShowingService service;
+    private boolean simpleCalculations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
         EditText etThreshold = findViewById(R.id.etThreshold);
         EditText etViewport = findViewById(R.id.etViewport);
         service = new OverlayShowingService();
+
+        CheckBox cbSimple = findViewById(R.id.simpleCalculations);
+        simpleCalculations = cbSimple.isChecked();
 
         String[] permissions = {"android.permission.ACCESS_BACKGROUND_LOCATION",
                 "android.permission.ACCESS_COARSE_LOCATION",
@@ -91,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(mActivity, service.getClass());
         intent.putExtra("threshold", threshold);
         intent.putExtra("viewport", viewport);
+        intent.putExtra("simpleCalculations", simpleCalculations);
 
         mActivity.stopService(intent);
         mActivity.startForegroundService(intent);
