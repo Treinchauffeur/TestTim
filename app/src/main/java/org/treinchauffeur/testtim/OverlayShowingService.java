@@ -378,7 +378,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                     if (location.hasSpeed()) {
                         setSpeed(location.getSpeed());
-                        tvSpeed.setText("Speed (GPS): " + speedKmh + " km/h");
+                        tvSpeed.setText("Speed (GPS): " + (int) speedKmh + " km/h");
                         tvSpeed.setTextColor(Color.WHITE);
                     } else {
                         tvSpeed.setText("Speed (GPS): NaN");
@@ -402,9 +402,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
     }
 
-    int counter = 0;
-    float[] dataToAverage = new float[4];
+    float dataToAverage = 0;
     float diagonalAxisInput = 0;
+    float kFilteringFactor = 0.1f, ALPHA = 0.2f;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -416,6 +416,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
             setXY(event.values[1], event.values[2]);
 
+            //Calibration correction; setting the zero-point because using linear-acceleration is slow
             if (xCorrector != 0) {
                 finalX = (float) (uncorrectedX - xCorrector);
                 finalY = (float) (uncorrectedY - yCorrector);
@@ -425,22 +426,18 @@ public class OverlayShowingService extends Service implements SensorEventListene
             }
 
             if (!simpleCalculations) {
-                diagonalAxisInput = placedLeft ? (finalY - (finalX * -1)) : (finalY - finalX);
+                diagonalAxisInput = placedLeft ? ((finalY - (finalX * -1)) * -1) : ((finalY - finalX) * -1);
             } else {
                 diagonalAxisInput = finalY;
             }
-            dataToAverage[counter] = diagonalAxisInput;
-            if (counter == 3) {
-                float average = (dataToAverage[0] + dataToAverage[1] + dataToAverage[2] + dataToAverage[3]) / 4;
-                graphLastAccelXValue += 0.15d;
-                int multiplier = 3;
-                mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
-                mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, average * multiplier), true, 33);
-                mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
-                counter = 0;
-                return;
-            }
-            counter++;
+
+            dataToAverage = dataToAverage + ALPHA * (diagonalAxisInput - dataToAverage); //Low-pass filter
+            float average = dataToAverage;
+
+            graphLastAccelXValue += 0.15d;
+            mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
+            mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, average), true, 33);
+            mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
         }
 
         //Shows 'train is moving' on graph when acceleration forces are fel, the threshold being supplied by host activity
