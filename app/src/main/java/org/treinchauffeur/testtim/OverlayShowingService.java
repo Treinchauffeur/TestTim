@@ -1,6 +1,7 @@
 package org.treinchauffeur.testtim;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -18,6 +19,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.app.Service;
@@ -43,18 +45,22 @@ import com.jjoe64.graphview.*;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.treinchauffeur.testtim.io.ScreenRecorder;
+
 import java.util.Iterator;
 
 public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
 
     private Context context;
     private WindowManager mWindowManager;
+    private PowerManager powerManager;
     private View overlayView;
     private LocationManager locationManager;
     private WindowManager.LayoutParams mWindowsParams;
     private GnssStatus.Callback status;
     private SensorManager sensorManager;
     private Sensor sensor;
+    private ScreenRecorder screenRecorder;
     public static final String TAG = "OverLayService";
 
     private GraphView graphAccel;
@@ -67,9 +73,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
     double xCorrector = 0, yCorrector = 0;
     float uncorrectedX = 0, uncorrectedY = 0;
     float finalX = 0, finalY = 0;
+    private PowerManager.WakeLock wakeLock;
 
     private boolean simpleCalculations = true; //debugging
-
 
     private float speed = 0, speedKmh = 0;
     private boolean hasGPSFix;
@@ -85,17 +91,23 @@ public class OverlayShowingService extends Service implements SensorEventListene
         context = this;
     }
 
+    @SuppressLint("WakelockTimeout")
+//As long as service is active, we don't want the screen to timeout.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
         accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
         simpleCalculations = intent.getBooleanExtra("simpleCalculations", true);
         viewport = intent.getIntExtra("viewport", 2);
-        Log.d(TAG, "" + accelerometerThreshold);
 
+        //Because passing a KEEP_SCREEN_ON parameter to a window service (inst of an Activity) is apparently illegal.
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "TestTim: Main WakeLock");
+        wakeLock.acquire();
 
         createNotification();
         drawLayout(intent);
@@ -103,6 +115,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         placeView();
         doLocationInfo();
         doGraphSetup();
+        setupRecorder();
 
         return START_STICKY;
     }
@@ -141,9 +154,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onDestroy() {
-        if (overlayView != null) {
+        if (overlayView != null)
             mWindowManager.removeView(overlayView);
-        }
+        if (screenRecorder != null)
+            screenRecorder.onDestroy();
+        if (wakeLock != null)
+            wakeLock.release();
+
         super.onDestroy();
     }
 
@@ -268,7 +285,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView tvElevation = overlayView.findViewById(R.id.tvElevation);
         TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
         TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
-        //TextView tvHideGraph = overlayView.findViewById(R.id.graphHider);
         status = new GnssStatus.Callback() {
             @Override
             public void onStarted() {
@@ -318,13 +334,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
 
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
+                    Toast.makeText(context, "Please allow location permissions in app settings", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Location location = null;
@@ -388,13 +398,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
             }
         };
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            Toast.makeText(context, "Please allow location permissions in app settings", Toast.LENGTH_SHORT).show();
             return;
         }
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
@@ -404,7 +408,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     float dataToAverage = 0;
     float diagonalAxisInput = 0;
-    float kFilteringFactor = 0.1f, ALPHA = 0.2f;
+    float ALPHA = 0.2f;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -539,5 +543,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void setSpeed(float speed) {
         this.speed = speed;
         this.speedKmh = (float) (speed * 3.6);
+    }
+
+    private void setupRecorder() {
+        screenRecorder = new ScreenRecorder(this, overlayView);
+        screenRecorder.setupRecorder();
     }
 }

@@ -43,7 +43,14 @@
         android:id="@+id/simpleCalculations"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:text="Use simple calculations?" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Screen capture permissions"
+        android:backgroundTint="#882222" />
 
     <Button
         android:id="@+id/btnStartService"
