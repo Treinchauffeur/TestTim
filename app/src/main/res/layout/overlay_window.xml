@@ -37,7 +37,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:visibility="invisible"
+        android:visibility="visible"
         android:id="@+id/recBtns"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,21 +45,22 @@
         android:layout_below="@+id/topBtns"
         android:layout_alignParentRight="true">
 
-        <ToggleButton
-            android:id="@+id/btnRec"
+        <TextView
+            android:id="@+id/tvRec"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:gravity="center"
             android:text="REC"
             android:textColor="#FF0000"
+            android:layout_marginRight="10dp"
             android:textSize="12dp" />
 
-        <Chronometer
-            android:id="@+id/tvRec"
+        <TextView
+            android:id="@+id/tvRecTime"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
-
+            android:text="00:00"
             android:clickable="true"
             android:gravity="center"
             android:textColor="#88FFFFFF"

@@ -44,10 +44,10 @@ public class ScreenRecorder {
     private VirtualDisplay mVirtualDisplay;
     private MediaProjectionCallback mMediaProjectionCallback;
     private MediaRecorder mMediaRecorder;
-    private View overlayView;
+    private final View overlayView;
     private ToggleButton mToggleButton;
 
-    private Context context;
+    private final Context context;
 
     public ScreenRecorder(Context context, View base) {
         this.context = context;
@@ -66,13 +66,13 @@ public class ScreenRecorder {
         mProjectionManager = (MediaProjectionManager) context.getSystemService
                 (Context.MEDIA_PROJECTION_SERVICE);
 
-        mToggleButton = (ToggleButton) overlayView.findViewById(R.id.btnRec);
+        /*mToggleButton = (ToggleButton) overlayView.findViewById(R.id.btnRec);
         mToggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onToggleScreenShare(v);
             }
-        });
+        });*/
 
         mMediaProjectionCallback = new MediaProjectionCallback();
     }

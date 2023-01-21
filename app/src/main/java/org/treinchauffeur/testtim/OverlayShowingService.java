@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -172,7 +173,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private void setButtonActions() {
         TextView btnClose = overlayView.findViewById(R.id.btnClose);
-        TextView btnRec = overlayView.findViewById(R.id.btnRec);
         TextView btnCalibrate = overlayView.findViewById(R.id.calibrate);
         TextView btnResetCalibration = overlayView.findViewById(R.id.calibrateReset);
         graphHider = overlayView.findViewById(R.id.graphHider);
@@ -184,15 +184,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
             }
         });
 
-        Chronometer chronometer = overlayView.findViewById(R.id.tvRec);
-        btnRec.setOnClickListener(new View.OnClickListener() {
+        TextView tvRec = overlayView.findViewById(R.id.tvRec);
+        tvRec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //chronometer.start(); //Yeahhhhhh let's not
-                //TODO everything below.. Probably have to start figuring out local recording.
-                //Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.samsung.android.app.screenrecorder");
-                //startActivity(launchIntent);
-                Toast.makeText(context, "Doesn't work yet, just counts..", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent();
+                i.setComponent(new ComponentName("com.hecorat.screenrecorder.free", "com.hecorat.screenrecorder.free.services.RecordService"));
+                context.startService(i);
             }
         });
 
@@ -333,10 +331,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     }
                 }
 
+                //If we don't have location permissions, request them from the user
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(context, "Please allow location permissions in app settings", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                //After restarting device, lastknownlocation is pretty much always null.
+                //Network provider is most likely to have lkl.
                 Location location = null;
                 if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -348,7 +349,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 hasGPSFix = true;
                 String fixTypeText = "GNSS fix: ";
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    tvFixType.setText(fixTypeText + "false; fix data too old");
+                    //Fix too old
+                    tvFixType.setText(fixTypeText + "false");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                     tvLatLong.setTextColor(Color.parseColor("#88FFFFFF"));
                     tvElevation.setTextColor(Color.parseColor("#88FFFFFF"));
@@ -356,12 +358,15 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
                     hasGPSFix = false;
                 } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
+                    //If we don't have altitude, or it's unreasonably high (let's say 200m for now, we consider this to be in error), fix is 2D.
                     tvFixType.setText(fixTypeText + "2D");
                     tvFixType.setTextColor(Color.parseColor("#FFFF00"));
                 } else if (location.getAltitude() < 200) {
+                    //Best-case scenario. We have altitude, and we consider this to have a reasonable value.
                     tvFixType.setText(fixTypeText + "3D");
                     tvFixType.setTextColor(Color.parseColor("#00FF00"));
                 } else {
+                    //So we have altitude, which is lower than 200m.
                     tvFixType.setText(fixTypeText + "ERROR");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                 }
@@ -391,16 +396,14 @@ public class OverlayShowingService extends Service implements SensorEventListene
                         tvSpeed.setText("Speed (GPS): " + (int) speedKmh + " km/h");
                         tvSpeed.setTextColor(Color.WHITE);
                     } else {
+                        setSpeed(-1);
                         tvSpeed.setText("Speed (GPS): NaN");
                         tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
                     }
                 }
             }
         };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Please allow location permissions in app settings", Toast.LENGTH_SHORT).show();
-            return;
-        }
+
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
         locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
@@ -429,15 +432,18 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 finalY = (float) (uncorrectedY);
             }
 
+            //Was testing with simpler calculations due to performance impact, will probably remove in release.
             if (!simpleCalculations) {
                 diagonalAxisInput = placedLeft ? ((finalY - (finalX * -1)) * -1) : ((finalY - finalX) * -1);
             } else {
                 diagonalAxisInput = finalY;
             }
 
-            dataToAverage = dataToAverage + ALPHA * (diagonalAxisInput - dataToAverage); //Low-pass filter
+            //Applying low-pass-filter to data for smoothing.
+            dataToAverage = dataToAverage + ALPHA * (diagonalAxisInput - dataToAverage);
             float average = dataToAverage;
 
+            //Apply data to graph.
             graphLastAccelXValue += 0.15d;
             mSeriesAccelX.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
             mSeriesAccelY.appendData(new DataPoint(graphLastAccelXValue, average), true, 33);
@@ -445,7 +451,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         }
 
         //Shows 'train is moving' on graph when acceleration forces are fel, the threshold being supplied by host activity
-        Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 3, mSeriesAccelY.getHighestValueX());
+        Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 5, mSeriesAccelY.getHighestValueX());
         double highestYViewable = 0;
         double lowestYViewable = 0;
 
@@ -458,17 +464,28 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 lowestYViewable = point.getY();
         }
 
+        //If acceleration is measured, display this to the user.
         if (accelerometerThreshold > 0) {
             if (highestYViewable - lowestYViewable > accelerometerThreshold) {
                 graphHider.setVisibility(View.VISIBLE);
-            } else {
+            } else if ((highestYViewable - lowestYViewable < accelerometerThreshold) && speed < 5) {
                 graphHider.setVisibility(View.GONE);
             }
         }
+
+        //If GPS speed is above 5m/s and signal is reliable, display this to the user.
+        //This is because we don't really need the graph at this point.
+        if ((speed >= 5) && (graphHider.getVisibility() != View.VISIBLE) && hasGPSFix) {
+            graphHider.setText("V > 5m/s");
+            graphHider.setVisibility(View.VISIBLE);
+        } else {
+            graphHider.setText("Train is moving");
+        }
     }
 
+    //Setup the graph style, and start listening for accelerometer value changes.
+    //We have an on-board onchangelistener implemented for this reason.
     private void doGraphSetup() {
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         graphAccel = initGraph(R.id.graphAccel, "m/s^2");
         graphAccel.getLegendRenderer().setVisible(false);
         graphAccel.setTitleColor(Color.WHITE);
@@ -482,7 +499,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
         graphAccel.getGridLabelRenderer().reloadStyles();
 
-
         mSeriesAccelX = initSeries(Color.BLACK, "X"); //back and forth
         mSeriesAccelY = initSeries(Color.RED, "Y");//side to side
         mSeriesAccelZ = initSeries(Color.BLACK, "Z"); //up and down
@@ -491,12 +507,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.addSeries(mSeriesAccelY);
         graphAccel.addSeries(mSeriesAccelZ);
 
-
         graphAccel.getViewport().setMinY((double) viewport * -1);
         graphAccel.getViewport().setMaxY((double) viewport);
         graphAccel.getViewport().setYAxisBoundsManual(true);
 
-        startAccel();
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
+
     }
 
     private void setXY(float x, float y) {
@@ -506,7 +522,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
+        //Required method, ignore.
     }
 
     @Override
@@ -514,6 +530,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         //Might be a duplicate call, but probably stil necessary
     }
 
+    //Initiate the Graph
     public GraphView initGraph(int id, String title) {
         GraphView graph = overlayView.findViewById(id);
         graph.getViewport().setXAxisBoundsManual(true);
@@ -525,6 +542,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return graph;
     }
 
+    //Initiate the series (individual lines)
     public LineGraphSeries<DataPoint> initSeries(int color, String title) {
         LineGraphSeries<DataPoint> series;
         series = new LineGraphSeries<>();
@@ -536,15 +554,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return series;
     }
 
-    public void startAccel() {
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
+    //Setting the speed in a global value.
     public void setSpeed(float speed) {
         this.speed = speed;
         this.speedKmh = (float) (speed * 3.6);
     }
 
+    //Initiate screen recorder.
     private void setupRecorder() {
         screenRecorder = new ScreenRecorder(this, overlayView);
         screenRecorder.setupRecorder();
