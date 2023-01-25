@@ -39,17 +39,11 @@
         android:inputType="numberDecimal"
         android:layout_marginBottom="10dp" />
 
-    <CheckBox
-        android:id="@+id/simpleCalculations"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:text="Use simple calculations?" />
-
     <Button
+        android:id="@+id/recInit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Screen capture permissions"
+        android:text="Initiate screencap"
         android:backgroundTint="#882222" />
 
     <Button
@@ -60,12 +54,5 @@
         android:layout_below="@+id/tvValue"
         android:text="Start Overlay Service" />
 
-    <Button
-        android:id="@+id/btnClose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/btnStartService"
-        android:layout_toRightOf="@+id/btnStartService"
-        android:text="Close Activity" />
 
 </LinearLayout>

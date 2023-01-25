@@ -107,7 +107,7 @@
             android:id="@+id/tvLatLong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lat/long: NaN, NaN"
+            android:text="Pos: NaN, NaN"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -254,6 +254,7 @@
                                 android:id="@+id/sat1"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -261,6 +262,7 @@
                                 android:id="@+id/sat2"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -268,6 +270,7 @@
                                 android:id="@+id/sat3"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -275,6 +278,7 @@
                                 android:id="@+id/sat4"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -282,6 +286,7 @@
                                 android:id="@+id/sat5"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -289,6 +294,7 @@
                                 android:id="@+id/sat6"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -296,6 +302,7 @@
                                 android:id="@+id/sat7"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -303,6 +310,7 @@
                                 android:id="@+id/sat8"
                                 android:layout_width="4dp"
                                 android:layout_height="10dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -310,6 +318,7 @@
                                 android:id="@+id/sat9"
                                 android:layout_width="4dp"
                                 android:layout_height="40dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#FFFF00" />
 
@@ -317,6 +326,7 @@
                                 android:id="@+id/sat10"
                                 android:layout_width="4dp"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#00FF00" />
 
@@ -324,6 +334,7 @@
                                 android:id="@+id/sat11"
                                 android:layout_width="4dp"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#00FF00" />
 
@@ -331,6 +342,7 @@
                                 android:id="@+id/sat12"
                                 android:layout_width="4dp"
                                 android:layout_height="match_parent"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#00FF00" />
 
@@ -338,6 +350,7 @@
                                 android:id="@+id/sat13"
                                 android:layout_width="4dp"
                                 android:layout_height="70dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#FFFF00" />
 
@@ -345,6 +358,7 @@
                                 android:id="@+id/sat14"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -352,6 +366,7 @@
                                 android:id="@+id/sat15"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -359,6 +374,7 @@
                                 android:id="@+id/sat16"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -366,6 +382,7 @@
                                 android:id="@+id/sat17"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -373,6 +390,7 @@
                                 android:id="@+id/sat18"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -380,6 +398,7 @@
                                 android:id="@+id/sat19"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -387,6 +406,7 @@
                                 android:id="@+id/sat20"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -394,6 +414,7 @@
                                 android:id="@+id/sat21"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -401,6 +422,7 @@
                                 android:id="@+id/sat22"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -408,6 +430,7 @@
                                 android:id="@+id/sat23"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -415,6 +438,7 @@
                                 android:id="@+id/sat24"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -422,6 +446,7 @@
                                 android:id="@+id/sat25"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -429,6 +454,7 @@
                                 android:id="@+id/sat26"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -436,6 +462,7 @@
                                 android:id="@+id/sat27"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -443,6 +470,7 @@
                                 android:id="@+id/sat28"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -450,6 +478,7 @@
                                 android:id="@+id/sat29"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -457,6 +486,7 @@
                                 android:id="@+id/sat30"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -464,6 +494,7 @@
                                 android:id="@+id/sat31"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -471,6 +502,7 @@
                                 android:id="@+id/sat32"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -478,6 +510,7 @@
                                 android:id="@+id/sat33"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -485,6 +518,7 @@
                                 android:id="@+id/sat34"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -492,6 +526,7 @@
                                 android:id="@+id/sat35"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -499,6 +534,7 @@
                                 android:id="@+id/sat36"
                                 android:layout_width="4dp"
                                 android:layout_height="1dp"
+                                android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
                                 android:background="#ff0000" />
 
@@ -527,19 +563,21 @@
                     android:textColor="@color/white"
                     android:textSize="12dp" />
 
-                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/graphHider"
+                        android:id="@+id/graphText"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#88000000"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
                         android:elevation="5dp"
-                        android:gravity="center"
-                        android:text="Train is moving"
+                        android:gravity="center_horizontal"
+                        android:padding="10dp"
+                        android:text="Train is movingg"
+                        android:textSize="12dp"
                         android:textColor="@color/white" />
 
                     <com.jjoe64.graphview.GraphView

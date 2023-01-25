@@ -6,10 +6,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,6 +17,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
@@ -28,12 +28,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Chronometer;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,9 +44,11 @@ import com.jjoe64.graphview.*;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import org.treinchauffeur.testtim.io.ScreenRecorder;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Locale;
 
 public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
 
@@ -61,14 +61,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private GnssStatus.Callback status;
     private SensorManager sensorManager;
     private Sensor sensor;
-    private ScreenRecorder screenRecorder;
     public static final String TAG = "OverLayService";
 
     private GraphView graphAccel;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
     private boolean placedLeft = false;
-    private TextView graphHider;
+    private TextView graphText;
     double accelerometerThreshold = 0;
     int viewport;
     double xCorrector = 0, yCorrector = 0;
@@ -80,6 +79,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private float speed = 0, speedKmh = 0;
     private boolean hasGPSFix;
+
+    private MediaProjection recordingMediaProjection;
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -116,7 +118,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         placeView();
         doLocationInfo();
         doGraphSetup();
-        setupRecorder();
+        //TODO setup recorder
 
         return START_STICKY;
     }
@@ -157,8 +159,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onDestroy() {
         if (overlayView != null)
             mWindowManager.removeView(overlayView);
-        if (screenRecorder != null)
-            screenRecorder.onDestroy();
         if (wakeLock != null)
             wakeLock.release();
 
@@ -175,22 +175,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView btnClose = overlayView.findViewById(R.id.btnClose);
         TextView btnCalibrate = overlayView.findViewById(R.id.calibrate);
         TextView btnResetCalibration = overlayView.findViewById(R.id.calibrateReset);
-        graphHider = overlayView.findViewById(R.id.graphHider);
+        graphText = overlayView.findViewById(R.id.graphText);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 stopSelf();
-            }
-        });
-
-        TextView tvRec = overlayView.findViewById(R.id.tvRec);
-        tvRec.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent();
-                i.setComponent(new ComponentName("com.hecorat.screenrecorder.free", "com.hecorat.screenrecorder.free.services.RecordService"));
-                context.startService(i);
             }
         });
 
@@ -229,6 +219,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 xCorrector = 0;
                 yCorrector = 0;
                 btnCalibrate.setTextColor(Color.WHITE);
+            }
+        });
+
+        TextView recStart = overlayView.findViewById(R.id.tvRec);
+        recStart.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                recordingStart();
             }
         });
 
@@ -373,7 +370,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                 if (hasGPSFix) {
                     tvLatLong.setTextColor(Color.WHITE);
-                    tvLatLong.setText("Lat/long: " +
+                    tvLatLong.setText("Pos: " +
                             location.getLatitude() + ", " + location.getLongitude());
 
                     if (location.hasAltitude()) {
@@ -456,6 +453,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         double lowestYViewable = 0;
 
         //Hate doing this, but the GraphView library apparently doesn't provide a better way
+        //And as suspected, #TODO a bug where it always only returns one correct value, the other one is always incorrect..
         for (Iterator<DataPoint> it = viewableData; it.hasNext(); ) {
             DataPoint point = it.next();
             if (point.getY() > highestYViewable)
@@ -465,22 +463,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         }
 
         //If acceleration is measured, display this to the user.
-        if (accelerometerThreshold > 0) {
-            if (highestYViewable - lowestYViewable > accelerometerThreshold) {
-                graphHider.setVisibility(View.VISIBLE);
-            } else if ((highestYViewable - lowestYViewable < accelerometerThreshold) && speed < 5) {
-                graphHider.setVisibility(View.GONE);
-            }
-        }
-
-        //If GPS speed is above 5m/s and signal is reliable, display this to the user.
-        //This is because we don't really need the graph at this point.
-        if ((speed >= 5) && (graphHider.getVisibility() != View.VISIBLE) && hasGPSFix) {
-            graphHider.setText("V > 5m/s");
-            graphHider.setVisibility(View.VISIBLE);
-        } else {
-            graphHider.setText("Train is moving");
-        }
+        //Ignores accelerometer when GPS-given speed exceeds 5m/s
+        //Now making distinctions between accelerating, decelerating and just moving
+        graphText.setText(getIsAcceleratingText(highestYViewable, lowestYViewable));
     }
 
     //Setup the graph style, and start listening for accelerometer value changes.
@@ -560,9 +545,29 @@ public class OverlayShowingService extends Service implements SensorEventListene
         this.speedKmh = (float) (speed * 3.6);
     }
 
-    //Initiate screen recorder.
-    private void setupRecorder() {
-        screenRecorder = new ScreenRecorder(this, overlayView);
-        screenRecorder.setupRecorder();
+
+    private void recordingStart() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
+        String timeString = formatter.format(Calendar.getInstance().getTime());
+
+        MediaProjectionManager recordingMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        if (recordingMediaProjection != null) {
+            recordingMediaProjection.stop();
+        }
     }
+
+    private String getIsAcceleratingText(double highest, double lowest) {
+        if (hasGPSFix && speed > 5)
+            return "V > 5 m/s";
+        else if (lowest > 0.3 && highest > 0.3)
+            return "Train is accelerating";
+        else if (highest < -0.3 && lowest < -0.3)
+            return "Train is decelerating";
+        else if (highest - lowest > accelerometerThreshold) {
+            //Log.d(TAG, "getIsAcceleratingText: "+highest +" "+ lowest); //Debug the highest/lowest values bug
+            return "Train is moving";
+        } else
+            return "Train is stationary";
+    }
+
 }
