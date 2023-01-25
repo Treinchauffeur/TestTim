@@ -273,6 +273,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     }
 
 
+    //Handles all the location data. Everything from displaying the GNSS data to getting and calculating the speed
     private void doLocationInfo() {
         ViewGroup graph = overlayView.findViewById(R.id.signalStrengthGraph);
         TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
@@ -291,6 +292,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 super.onStopped();
             }
 
+            //We don't do anything with this
             @Override
             public void onFirstFix(int ttffMillis) {
                 super.onFirstFix(ttffMillis);
@@ -313,7 +315,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                             else if (status.getCn0DbHz(i) < 15)
                                 graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
 
-                            //Setting layout height when signal > 0;
+                            //Setting layout height of individual bars when signal > 0;
                             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
                             lp.height = (int) (graph.getHeight() * (status.getCn0DbHz(i) / 45));
 
@@ -329,6 +331,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
 
                 //If we don't have location permissions, request them from the user
+                //TODO Is this the right place?
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(context, "Please allow location permissions in app settings", Toast.LENGTH_SHORT).show();
                     return;
@@ -346,7 +349,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 hasGPSFix = true;
                 String fixTypeText = "GNSS fix: ";
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    //Fix too old
+                    //The last known fix is too old, and therefor we currently we don't have one
                     tvFixType.setText(fixTypeText + "false");
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                     tvLatLong.setTextColor(Color.parseColor("#88FFFFFF"));
@@ -368,11 +371,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     tvFixType.setTextColor(Color.parseColor("#FF0000"));
                 }
 
+
                 if (hasGPSFix) {
+                    //We deliberately display the lat/long even when there is no current GNSS Fix available,
+                    //so that we can see WHERE the signal was lost
                     tvLatLong.setTextColor(Color.WHITE);
                     tvLatLong.setText("Pos: " +
                             location.getLatitude() + ", " + location.getLongitude());
 
+                    //We assume that the location is inaccurate when the altitude is above 200m
+                    //I mean this is the Netherlands after all
                     if (location.hasAltitude()) {
                         tvElevation.setText("Elevation: " + (int) location.getAltitude() + "m");
                         if (location.getAltitude() >= 200)
@@ -381,13 +389,15 @@ public class OverlayShowingService extends Service implements SensorEventListene
                             tvElevation.setTextColor(Color.WHITE);
 
                     }
-                    tvAccuracy.setText("Accuracy: " + (int) location.getAccuracy() + "m");
 
+                    //TimTim won't use the location when accuracy exceeds 50m, so we DO use it, but draw it in red
+                    tvAccuracy.setText("Accuracy: " + (int) location.getAccuracy() + "m");
                     if (location.getAccuracy() > 50)
                         tvAccuracy.setTextColor(Color.parseColor("#FF0000"));
                     else
                         tvAccuracy.setTextColor(Color.WHITE);
 
+                    //Pretty basic, displays the GNSS-provided speed
                     if (location.hasSpeed()) {
                         setSpeed(location.getSpeed());
                         tvSpeed.setText("Speed (GPS): " + (int) speedKmh + " km/h");
@@ -401,6 +411,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
             }
         };
 
+        //Registers a GNSS callback listener (GnssStatus.Callback status) & generic location listener (this class)
+        //TODO is this the right place for this specific call?
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
         locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
@@ -414,13 +426,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
-            //0: up and down
-            //1: side to side
-            //2: back and forth
+            /* Sensor data vs the various tablet directions of movement
+             * 0: up and down
+             * 1: side to side
+             * 2: back and forth
+             */
 
+            //puts values in global fields
             setXY(event.values[1], event.values[2]);
 
-            //Calibration correction; setting the zero-point because using linear-acceleration is slow
+            //Calibration correction; setting the zero-point because using the linear-acceleration sensor (which negates gravity) is slow
             if (xCorrector != 0) {
                 finalX = (float) (uncorrectedX - xCorrector);
                 finalY = (float) (uncorrectedY - yCorrector);
@@ -429,12 +444,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 finalY = (float) (uncorrectedY);
             }
 
-            //Was testing with simpler calculations due to performance impact, will probably remove in release.
-            if (!simpleCalculations) {
-                diagonalAxisInput = placedLeft ? ((finalY - (finalX * -1)) * -1) : ((finalY - finalX) * -1);
-            } else {
-                diagonalAxisInput = finalY;
-            }
+            //We want to get the diagonal acceleration force since the tablet is pretty much always angled at 45 degrees in the direction of travel.
+            //By doing this we also negate side-to-side movement of the train in switches & other curves / the shitshow we call 'stable' ground.
+            //TODO Use tangent to calculate force instead of doing this
+            diagonalAxisInput = placedLeft ? ((finalY - (finalX * -1)) * -1) : ((finalY - finalX) * -1);
 
             //Applying low-pass-filter to data for smoothing.
             dataToAverage = dataToAverage + ALPHA * (diagonalAxisInput - dataToAverage);
@@ -447,7 +460,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
             mSeriesAccelZ.appendData(new DataPoint(graphLastAccelXValue, 0), true, 33);
         }
 
-        //Shows 'train is moving' on graph when acceleration forces are fel, the threshold being supplied by host activity
+        //Shows 'train is moving' on graph when acceleration forces are felt, the threshold being supplied by host activity
         Iterator<DataPoint> viewableData = mSeriesAccelY.getValues(mSeriesAccelY.getHighestValueX() - 5, mSeriesAccelY.getHighestValueX());
         double highestYViewable = 0;
         double lowestYViewable = 0;
@@ -527,7 +540,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return graph;
     }
 
-    //Initiate the series (individual lines)
+    //Initiate the series (individual lines, of which we only use one)
     public LineGraphSeries<DataPoint> initSeries(int color, String title) {
         LineGraphSeries<DataPoint> series;
         series = new LineGraphSeries<>();
@@ -546,6 +559,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     }
 
 
+    //Honestly don't get me started
     private void recordingStart() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
         String timeString = formatter.format(Calendar.getInstance().getTime());
@@ -556,6 +570,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
         }
     }
 
+    //Gets the  text to display on the graph based on whether we have GPS (and therefor a known speed), or the accelerometer
+    //that the train is generally moving, or specifically accelerating, decelerating or stationary.
     private String getIsAcceleratingText(double highest, double lowest) {
         if (hasGPSFix && speed > 5)
             return "V > 5 m/s";
