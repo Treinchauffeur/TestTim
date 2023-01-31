@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base -->
+    <string name="app_name">TestTim</string>
+    <string name="action_settings">Instellingen</string>
+
+    <!-- UI -->
+    <string name="pos">"Pos: "</string>
+    <string name="elevation">"Hoogte: "</string>
+    <string name="accuracy">"Nauwkeurigheid: "</string>
+    <string name="speed">"Snelheid (GPS): "</string>
+    <string name="per_sat_snr">Satelliet signalen:</string>
+    <string name="placement_in_cab">Plaatsing tablet in cabine:</string>
+    <string name="left">LINKS</string>
+    <string name="right">RECHTS</string>
+    <string name="space_kmh">" km/u"</string>
+
+    <!-- Graph text -->
+    <string name="at_speed">V > 5m/s</string>
+    <string name="train_accel">Trein versnelt</string>
+    <string name="train_decel">Trein vertraagt</string>
+    <string name="train_moving">Trein beweegt</string>
+    <string name="train_stationary">Trein staat stil</string>
+
+    <!-- Toasts & Misc -->
+    <string name="toast_reset_placement">Scherm teruggezet naar originele positie &amp; op slot gezet</string>
+    <string name="permission_app_settings">Geef toestemming in de app-instellingen</string>
+    <string name="accelerometer">Versnellingsmeter</string>
+    <string name="none">Geen</string>
+    <string name="error">Fout</string>
+</resources>
