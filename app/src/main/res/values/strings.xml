@@ -15,7 +15,7 @@
     <string name="placement_in_cab">Tablet placement in cab: </string>
     <string name="left">LEFT</string>
     <string name="right">RIGHT</string>
-    <string name="set_calibration" translatable="false">Calibrate</string>
+    <string name="set_calibration">Calibrate</string>
     <string name="reset_calibration" translatable="false">Reset</string>
     <string name="nan" translatable="false">NaN</string>
     <string name="space_kmh">" km/h"</string>

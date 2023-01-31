@@ -109,7 +109,7 @@
             android:id="@+id/tvLatLong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pos: NaN, NaN"
+            android:text="@string/pos"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -117,7 +117,7 @@
             android:id="@+id/tvElevation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Elevation: NaN"
+            android:text="@string/elevation"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -125,7 +125,7 @@
             android:id="@+id/tvAccuracy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Accuracy: NaN"
+            android:text="@string/accuracy"
             android:textColor="@color/white"
             android:textSize="12dp" />
 
@@ -143,7 +143,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:gravity="left"
-                android:text="Speed: NaN"
+                android:text="@string/speed"
                 android:textColor="@color/white"
                 android:textSize="12dp"
                 android:textStyle="bold" />
