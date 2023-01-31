@@ -1,12 +1,38 @@
 <resources>
+    <!-- Base -->
     <string name="app_name">TestTim</string>
     <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- UI -->
+    <string name="lock" translatable="false">LOCK</string>
+    <string name="unlock" translatable="false">UNLOCK</string>
+    <string name="gnss_fix" translatable="false">"GNSS Fix: "</string>
+    <string name="pos">"Pos: "</string>
+    <string name="elevation">"Elevation: "</string>
+    <string name="accuracy">"Accuracy: "</string>
+    <string name="speed">"Speed (GPS): "</string>
+    <string name="per_sat_snr">Satellite signals: </string>
+    <string name="placement_in_cab">Tablet placement in cab: </string>
+    <string name="left">LEFT</string>
+    <string name="right">RIGHT</string>
+    <string name="set_calibration" translatable="false">Calibrate</string>
+    <string name="reset_calibration" translatable="false">Reset</string>
+    <string name="nan" translatable="false">NaN</string>
+    <string name="space_kmh">" km/h"</string>
+    <string name="accelerometer">"Accelerometer"</string>
+
+
+    <!-- Graph text -->
+    <string name="at_speed">V > 5m/s</string>
+    <string name="train_accel">Train is accelerating</string>
+    <string name="train_decel">Train is decelerating</string>
+    <string name="train_moving">Train is moving</string>
+    <string name="train_stationary">Train is stationary</string>
+
+    <!-- Toasts & Misc -->
+    <string name="toast_reset_placement">View reset to original position &amp; locked</string>
+    <string name="permission_app_settings">Please allow location permissions in app settings</string>
+    <string name="none">None</string>
+    <string name="error">Error</string>
+
 </resources>

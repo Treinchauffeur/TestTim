@@ -6,28 +6,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
-import android.icu.text.SimpleDateFormat;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.Settings;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,9 +26,8 @@ public class MainActivity extends AppCompatActivity {
     double threshold = 0;
     int viewport = 0;
     OverlayShowingService service;
-    private boolean simpleCalculations;
     private final DisplayMetrics displayMetrics = new DisplayMetrics();
-    //Screenrecorder stuff
+    //Screen recorder stuff
     public MediaProjection mediaProjection;
     public int REC_RQST_CODE = 1312;
     public MediaProjectionManager mediaManager;
@@ -46,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     public MediaRecorder mediaRecorder;
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
 
+    @SuppressWarnings("deprecation")//TODO use a newer api to get display metrics
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         SCREEN_WIDTH = displayMetrics.widthPixels;
 
         mActivity = this;
-        Button btnStartService = (Button) findViewById(R.id.btnStartService);
+        Button btnStartService = findViewById(R.id.btnStartService);
 
         EditText etThreshold = findViewById(R.id.etThreshold);
         EditText etViewport = findViewById(R.id.etViewport);
@@ -80,29 +70,23 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissions, 1);
         }
 
-        btnStartService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!etThreshold.getText().toString().equals(""))
-                    threshold = Double.parseDouble(etThreshold.getText().toString());
-                else {
-                    etThreshold.setError("Need to set threshold");
-                    return;
-                }
-                if (!etViewport.getText().toString().equals(""))
-                    viewport = Integer.parseInt(etViewport.getText().toString());
-                else {
-                    etViewport.setError("Need to set viewport");
-                    return;
-                }
-                checkDrawOverlayPermission();
+        btnStartService.setOnClickListener(view -> {
+            if (!etThreshold.getText().toString().equals(""))
+                threshold = Double.parseDouble(etThreshold.getText().toString());
+            else {
+                etThreshold.setError("Need to set threshold");
+                return;
             }
+            if (!etViewport.getText().toString().equals(""))
+                viewport = Integer.parseInt(etViewport.getText().toString());
+            else {
+                etViewport.setError("Need to set viewport");
+                return;
+            }
+            checkDrawOverlayPermission();
         });
-        btnRec.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //shareScreen();
-            }
+        btnRec.setOnClickListener(view -> {
+            //shareScreen();
         });
         //initRecorder();
         //prepareRecorder();
@@ -110,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     public final static int OVERLAY_REQUEST_CODE = 251;
 
+    @SuppressWarnings("deprecation")//TODO update to latest android standards
     public void checkDrawOverlayPermission() {
         if (!Settings.canDrawOverlays(mActivity)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
@@ -123,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(mActivity, service.getClass());
         intent.putExtra("threshold", threshold);
         intent.putExtra("viewport", viewport);
-        intent.putExtra("simpleCalculations", simpleCalculations);
 
         mActivity.stopService(intent);
         mActivity.startForegroundService(intent);
