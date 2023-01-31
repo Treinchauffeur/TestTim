@@ -583,12 +583,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:elevation="5dp"
+                        android:elevation="10dp"
                         android:gravity="center_horizontal"
                         android:padding="10dp"
                         android:text="Train is movingg"
                         android:textSize="12dp"
                         android:textColor="@color/white" />
+
+                    <View
+                        android:id="@+id/graphHider"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#77000000"
+                        android:elevation="5dp" />
 
                     <com.jjoe64.graphview.GraphView
                         android:id="@+id/graphAccel"

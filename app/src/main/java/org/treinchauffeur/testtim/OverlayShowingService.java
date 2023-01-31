@@ -596,6 +596,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     //Gets the  text to display on the graph based on whether we have GPS (and therefor a known speed), or the accelerometer
     //that the train is generally moving, or specifically accelerating, decelerating or stationary.
     private String getIsAcceleratingText(double highest, double lowest) {
+        doHideGraph();
         if (hasGPSFix && speed > 5)
             return getString(R.string.at_speed);
         else if (lowest > 0.3 && highest > 0.3)
@@ -606,6 +607,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
             return getString(R.string.train_moving);
         else
             return getString(R.string.train_stationary);
+    }
+
+    //When gps signal is available & reliable, the graph isn't really all that necessary.
+    //So in order to take away any possible distraction, we 'hide' the graph with a semi-transparent black overlay.
+    private void doHideGraph() {
+        View graphHider = overlayView.findViewById(R.id.graphHider);
+        if (hasGPSFix && speed > 5)
+            graphHider.setVisibility(View.VISIBLE);
+        else
+            graphHider.setVisibility(View.INVISIBLE);
     }
 
 }
