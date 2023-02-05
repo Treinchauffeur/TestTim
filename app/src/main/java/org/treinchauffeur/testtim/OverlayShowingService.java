@@ -205,13 +205,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView btnRight = overlayView.findViewById(R.id.placedRight);
 
         btnLeft.setOnClickListener(view -> {
-            btnLeft.setTextColor(Color.WHITE);
+            btnLeft.setTextColor(getColor(R.color.transparent_white));
             btnRight.setTextColor(Color.parseColor("#888888"));
             placedLeft = true;
         });
         btnRight.setOnClickListener(view -> {
             btnLeft.setTextColor(Color.parseColor("#888888"));
-            btnRight.setTextColor(Color.WHITE);
+            btnRight.setTextColor(getColor(R.color.transparent_white));
             placedLeft = false;
         });
 
@@ -223,7 +223,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         btnResetCalibration.setOnClickListener(view -> {
             xCorrector = 0;
             yCorrector = 0;
-            btnCalibrate.setTextColor(Color.WHITE);
+            btnCalibrate.setTextColor(getColor(R.color.transparent_white));
         });
 
         TextView recStart = overlayView.findViewById(R.id.tvRec);
@@ -314,24 +314,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView tvElevation = overlayView.findViewById(R.id.tvElevation);
         TextView tvAccuracy = overlayView.findViewById(R.id.tvAccuracy);
         TextView tvSpeed = overlayView.findViewById(R.id.tvSpeed);
-        //We don't do anything with this
-        //Satellite graph
-        //coloring the bars
-        //Setting layout height of individual bars when signal > 0;
-        //if signal 0, red graph bar & zero height
-        //If we don't have location permissions, request them from the user
-        //After restarting device, lastknownlocation is pretty much always null.
-        //Network provider is most likely to have lkl.
-        //The last known fix is too old, and therefor we currently we don't have one
-        //If we don't have altitude, or it's unreasonably high (let's say 200m for now, we consider this to be in error), fix is 2D.
-        //Best-case scenario. We have altitude, and we consider this to have a reasonable value.
-        //Don't think this scenario can excist, but let's be certain
-        //We deliberately display the lat/long even when there is no current GNSS Fix available,
-        //so that we can see WHERE the signal was lost
-        //We assume that the location is inaccurate when the altitude is above 200m
-        //I mean this is the Netherlands after all
-        //TimTim won't use the location when accuracy exceeds 50m, so we DO use it, but draw it in red
-        //Pretty basic, displays the GNSS-provided speed
+
         GnssStatus.Callback status = new GnssStatus.Callback() {
             @Override
             public void onStarted() {
@@ -361,11 +344,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                             //coloring the bars
                             if (status.getCn0DbHz(i) >= 30)
-                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#00ff00"));
+                                graph.getChildAt(i).setBackgroundColor(getColor(R.color.transparent_green));
                             else if (status.getCn0DbHz(i) >= 15 && status.getCn0DbHz(i) < 30)
-                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ffff00"));
+                                graph.getChildAt(i).setBackgroundColor(getColor(R.color.transparent_yellow));
                             else if (status.getCn0DbHz(i) < 15)
-                                graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
+                                graph.getChildAt(i).setBackgroundColor(getColor(R.color.transparent_red));
 
                             //Setting layout height of individual bars when signal > 0;
                             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
@@ -377,7 +360,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) graph.getChildAt(i).getLayoutParams();
                             lp.height = 2;
                             graph.getChildAt(i).setLayoutParams(lp);
-                            graph.getChildAt(i).setBackgroundColor(Color.parseColor("#ff0000"));
+                            graph.getChildAt(i).setBackgroundColor(getColor(R.color.transparent_red));
                         }
                     }
                 }
@@ -400,33 +383,33 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 hasGPSFix = true;
                 String fixTypeText = getString(R.string.gnss_fix);
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    //The last known fix is too old, and therefor we currently we don't have one
+                    //The last known fix is too old, and therefor we conclude that we currently don't have one
                     tvFixType.setText(fixTypeText + getString(R.string.none));
-                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
-                    tvLatLong.setTextColor(Color.parseColor("#88FFFFFF"));
-                    tvElevation.setTextColor(Color.parseColor("#88FFFFFF"));
-                    tvAccuracy.setTextColor(Color.parseColor("#88FFFFFF"));
-                    tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
+                    tvFixType.setTextColor(getColor(R.color.transparent_red));
+                    tvLatLong.setTextColor(getColor(R.color.transparent_gray));
+                    tvElevation.setTextColor(getColor(R.color.transparent_gray));
+                    tvAccuracy.setTextColor(getColor(R.color.transparent_gray));
+                    tvSpeed.setTextColor(getColor(R.color.transparent_gray));
                     hasGPSFix = false;
                 } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
                     //If we don't have altitude, or it's unreasonably high (let's say 200m for now, we consider this to be in error), fix is 2D.
                     tvFixType.setText(fixTypeText + "2D");
-                    tvFixType.setTextColor(Color.parseColor("#FFFF00"));
+                    tvFixType.setTextColor(getColor(R.color.transparent_yellow));
                 } else if (location.getAltitude() < 200) {
                     //Best-case scenario. We have altitude, and we consider this to have a reasonable value.
                     tvFixType.setText(fixTypeText + "3D");
-                    tvFixType.setTextColor(Color.parseColor("#00FF00"));
+                    tvFixType.setTextColor(getColor(R.color.transparent_green));
                 } else {
-                    //Don't think this scenario can excist, but let's be certain
+                    //Don't think this scenario can exist, but let's be certain
                     tvFixType.setText(fixTypeText + getString(R.string.error));
-                    tvFixType.setTextColor(Color.parseColor("#FF0000"));
+                    tvFixType.setTextColor(getColor(R.color.transparent_red));
                 }
 
 
                 if (hasGPSFix) {
                     //We deliberately display the lat/long even when there is no current GNSS Fix available,
                     //so that we can see WHERE the signal was lost
-                    tvLatLong.setTextColor(Color.WHITE);
+                    tvLatLong.setTextColor(getColor(R.color.transparent_white));
                     tvLatLong.setText(getString(R.string.pos) +
                             location.getLatitude() + ", " + location.getLongitude());
 
@@ -435,28 +418,28 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     if (location.hasAltitude()) {
                         tvElevation.setText(getString(R.string.elevation) + (int) location.getAltitude() + "m");
                         if (location.getAltitude() >= 200)
-                            tvElevation.setTextColor(Color.parseColor("#FF0000"));
+                            tvElevation.setTextColor(getColor(R.color.transparent_red));
                         else
-                            tvElevation.setTextColor(Color.WHITE);
+                            tvElevation.setTextColor(getColor(R.color.transparent_white));
 
                     }
 
                     //TimTim won't use the location when accuracy exceeds 50m, so we DO use it, but draw it in red
                     tvAccuracy.setText(getString(R.string.accuracy) + (int) location.getAccuracy() + "m");
                     if (location.getAccuracy() > 50)
-                        tvAccuracy.setTextColor(Color.parseColor("#FF0000"));
+                        tvAccuracy.setTextColor(getColor(R.color.transparent_red));
                     else
-                        tvAccuracy.setTextColor(Color.WHITE);
+                        tvAccuracy.setTextColor(getColor(R.color.transparent_white));
 
                     //Pretty basic, displays the GNSS-provided speed
                     if (location.hasSpeed()) {
                         setSpeed(location.getSpeed());
                         tvSpeed.setText(getString(R.string.speed) + (int) speedKmh + getString(R.string.space_kmh));
-                        tvSpeed.setTextColor(Color.WHITE);
+                        tvSpeed.setTextColor(getColor(R.color.transparent_white));
                     } else {
                         setSpeed(-1);
                         tvSpeed.setText(getString(R.string.speed) + getString(R.string.nan));
-                        tvSpeed.setTextColor(Color.parseColor("#88FFFFFF"));
+                        tvSpeed.setTextColor(getColor(R.color.transparent_gray));
                     }
                 }
             }
@@ -464,8 +447,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
         //Registers a GNSS callback listener (GnssStatus.Callback status) & generic location listener (this class)
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
-        locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
     }
 
     @Override
@@ -520,19 +502,19 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private void doGraphSetup() {
         GraphView graphAccel = initGraph(R.id.graphAccel);
         graphAccel.getLegendRenderer().setVisible(false);
-        graphAccel.setTitleColor(Color.WHITE);
+        graphAccel.setTitleColor(getColor(R.color.transparent_white));
         graphAccel.setTitleTextSize(8);
         graphAccel.getGridLabelRenderer().setTextSize(12);
-        graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
-        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graphAccel.getGridLabelRenderer().setHorizontalAxisTitleColor(getColor(R.color.transparent_white));
+        graphAccel.getGridLabelRenderer().setVerticalAxisTitleColor(getColor(R.color.transparent_white));
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(getColor(R.color.transparent_white));
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(getColor(R.color.transparent_white));
+        graphAccel.getGridLabelRenderer().setVerticalLabelsColor(getColor(R.color.transparent_white));
+        graphAccel.getGridLabelRenderer().setHorizontalLabelsColor(getColor(R.color.transparent_white));
         graphAccel.getGridLabelRenderer().reloadStyles();
 
         mSeriesAccelX = initSeries(Color.BLACK, "X"); //back and forth
-        mSeriesAccelY = initSeries(Color.RED, "Y");//side to side
+        mSeriesAccelY = initSeries(getColor(R.color.transparent_red), "Y");//side to side
         mSeriesAccelZ = initSeries(Color.BLACK, "Z"); //up and down
 
         graphAccel.addSeries(mSeriesAccelX);

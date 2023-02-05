@@ -23,7 +23,7 @@
             android:clickable="true"
             android:gravity="center"
             android:text="@string/unlock"
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="12dp" />
 
         <TextView
@@ -33,7 +33,7 @@
             android:clickable="true"
             android:gravity="center"
             android:text="X"
-            android:textColor="@color/white" />
+            android:textColor="@color/transparent_white" />
     </LinearLayout>
 
     <LinearLayout
@@ -52,7 +52,7 @@
             android:clickable="true"
             android:gravity="center"
             android:text="REC"
-            android:textColor="#FF0000"
+            android:textColor="@color/transparent_red"
             android:layout_marginRight="10dp"
             android:textSize="12dp"
             android:visibility="gone" />
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TestTim "
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="16dp"
             android:textStyle="bold" />
 
@@ -91,7 +91,7 @@
             android:layout_alignBottom="@id/tvTitle"
             android:text="v1.0.0"
 
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="10dp" />
 
         <TextView
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:text="GNSS fix: NaN"
-            android:textColor="#FF0000"
+            android:textColor="@color/transparent_red"
             android:textSize="12dp"
             android:textStyle="bold" />
 
@@ -110,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pos"
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="12dp" />
 
         <TextView
@@ -118,7 +118,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/elevation"
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="12dp" />
 
         <TextView
@@ -126,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/accuracy"
-            android:textColor="@color/white"
+            android:textColor="@color/transparent_white"
             android:textSize="12dp" />
 
 
@@ -144,7 +144,7 @@
                 android:paddingTop="10dp"
                 android:gravity="left"
                 android:text="@string/speed"
-                android:textColor="@color/white"
+                android:textColor="@color/transparent_white"
                 android:textSize="12dp"
                 android:textStyle="bold" />
 
@@ -171,7 +171,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:text="@string/per_sat_snr"
-                    android:textColor="@color/white"
+                    android:textColor="@color/transparent_white"
                     android:textSize="12dp" />
 
                 <LinearLayout
@@ -202,7 +202,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat2"
@@ -210,7 +210,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat3"
@@ -218,7 +218,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat4"
@@ -226,7 +226,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat5"
@@ -234,7 +234,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat6"
@@ -242,7 +242,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat7"
@@ -250,7 +250,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat8"
@@ -258,7 +258,7 @@
                                 android:layout_height="10dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat9"
@@ -266,7 +266,7 @@
                                 android:layout_height="40dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#FFFF00" />
+                                android:background="@color/transparent_yellow" />
 
                             <View
                                 android:id="@+id/sat10"
@@ -274,7 +274,7 @@
                                 android:layout_height="match_parent"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#00FF00" />
+                                android:background="@color/transparent_green" />
 
                             <View
                                 android:id="@+id/sat11"
@@ -282,7 +282,7 @@
                                 android:layout_height="match_parent"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#00FF00" />
+                                android:background="@color/transparent_green" />
 
                             <View
                                 android:id="@+id/sat12"
@@ -290,7 +290,7 @@
                                 android:layout_height="match_parent"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#00FF00" />
+                                android:background="@color/transparent_green" />
 
                             <View
                                 android:id="@+id/sat13"
@@ -298,7 +298,7 @@
                                 android:layout_height="70dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#FFFF00" />
+                                android:background="@color/transparent_yellow" />
 
                             <View
                                 android:id="@+id/sat14"
@@ -306,7 +306,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat15"
@@ -314,7 +314,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat16"
@@ -322,7 +322,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat17"
@@ -330,7 +330,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat18"
@@ -338,7 +338,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat19"
@@ -346,7 +346,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat20"
@@ -354,7 +354,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat21"
@@ -362,7 +362,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat22"
@@ -370,7 +370,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat23"
@@ -378,7 +378,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat24"
@@ -386,7 +386,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat25"
@@ -394,7 +394,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat26"
@@ -402,7 +402,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat27"
@@ -410,7 +410,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat28"
@@ -418,7 +418,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat29"
@@ -426,7 +426,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat30"
@@ -434,7 +434,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat31"
@@ -442,7 +442,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat32"
@@ -450,7 +450,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat33"
@@ -458,7 +458,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat34"
@@ -466,7 +466,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat35"
@@ -474,7 +474,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
                             <View
                                 android:id="@+id/sat36"
@@ -482,7 +482,7 @@
                                 android:layout_height="1dp"
                                 android:animateLayoutChanges="true"
                                 android:layout_marginEnd="2dp"
-                                android:background="#ff0000" />
+                                android:background="@color/transparent_red" />
 
 
                         </LinearLayout>
@@ -499,7 +499,7 @@
                 android:clickable="true"
                 android:gravity="center"
                 android:text="@string/placement_in_cab"
-                android:textColor="@color/white"
+                android:textColor="@color/transparent_white"
                 android:textSize="12dp" />
 
             <LinearLayout
@@ -513,7 +513,7 @@
                     android:clickable="true"
                     android:gravity="center"
                     android:text="@string/left"
-                    android:textColor="#888888"
+                    android:textColor="@color/transparent_gray"
                     android:textSize="12dp"
                     android:textStyle="bold" />
 
@@ -524,7 +524,7 @@
                     android:clickable="true"
                     android:gravity="center"
                     android:text="@string/right"
-                    android:textColor="@color/white"
+                    android:textColor="@color/transparent_white"
                     android:textSize="12dp"
                     android:textStyle="bold" />
 
@@ -544,7 +544,7 @@
                     android:clickable="true"
                     android:gravity="center"
                     android:text="@string/set_calibration"
-                    android:textColor="@color/white"
+                    android:textColor="@color/transparent_white"
                     android:textSize="12dp" />
 
                 <TextView
@@ -554,7 +554,7 @@
                     android:clickable="true"
                     android:gravity="center"
                     android:text="@string/reset_calibration"
-                    android:textColor="@color/white"
+                    android:textColor="@color/transparent_white"
                     android:textSize="12dp" />
             </LinearLayout>
 
@@ -570,7 +570,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:text="@string/accelerometer"
-                    android:textColor="@color/white"
+                    android:textColor="@color/transparent_white"
                     android:textSize="12dp" />
 
                 <RelativeLayout
@@ -588,7 +588,7 @@
                         android:padding="10dp"
                         android:text="Train is movingg"
                         android:textSize="12dp"
-                        android:textColor="@color/white" />
+                        android:textColor="@color/transparent_white" />
 
                     <View
                         android:id="@+id/graphHider"
