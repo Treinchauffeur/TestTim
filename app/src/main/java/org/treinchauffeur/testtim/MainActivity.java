@@ -13,11 +13,24 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+
+import org.treinchauffeur.testtim.io.GeoJsonConverter;
+import org.treinchauffeur.testtim.io.LocationLogger;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,10 +61,14 @@ public class MainActivity extends AppCompatActivity {
 
         mActivity = this;
         Button btnStartService = findViewById(R.id.btnStartService);
+        Button exportLogs = findViewById(R.id.exportLogs);
+        Button btnRec = findViewById(R.id.recInit);
+        Button exportJSON = findViewById(R.id.exportJson);
 
         EditText etThreshold = findViewById(R.id.etThreshold);
         EditText etViewport = findViewById(R.id.etViewport);
-        Button btnRec = findViewById(R.id.recInit);
+        EditText exportText = findViewById(R.id.etExportDate);
+
         service = new OverlayShowingService();
 
         String[] permissions = {"android.permission.ACCESS_BACKGROUND_LOCATION",
@@ -85,11 +102,60 @@ public class MainActivity extends AppCompatActivity {
             }
             checkDrawOverlayPermission();
         });
-        btnRec.setOnClickListener(view -> {
-            //shareScreen();
+
+        exportText.setText(LocationLogger.dateFormatter.format(new Date()));
+
+        exportLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + ".txt");
+                Log.d(TAG, "onClick: fetching " + file.getPath());
+
+                if (!file.exists()) {
+                    Toast.makeText(mActivity, "File doesn't exist for this day; format DD-MM-YYYY", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onClick: File doesn't exist.");
+                    return;
+                }
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri uri = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
+                intent.setDataAndType(uri, "text/plain");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                startActivity(intent);
+            }
         });
-        //initRecorder();
-        //prepareRecorder();
+
+        exportJSON.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + ".txt");
+                    Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
+                    GeoJsonConverter.readFile(toConvert, MainActivity.this);
+
+                    File convertedFile = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_json" + ".json");
+                    FileOutputStream out = new FileOutputStream(convertedFile);
+                    OutputStreamWriter writer = new OutputStreamWriter(out);
+
+                    writer.write(GeoJsonConverter.convert());
+                    writer.close();
+                    out.close();
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    Uri uri = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", convertedFile);
+                    intent.setDataAndType(uri, "text/plain");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    startActivity(intent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 
     public final static int OVERLAY_REQUEST_CODE = 251;

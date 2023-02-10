@@ -46,6 +46,27 @@
         android:text="Initiate screencap"
         android:backgroundTint="#882222" />
 
+    <EditText
+        android:id="@+id/etExportDate"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="12-31-9999" />
+
+    <Button
+        android:id="@+id/exportLogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Export location logs"
+        android:backgroundTint="#8DD339" />
+
+    <Button
+        android:id="@+id/exportJson"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Export JSON"
+        android:backgroundTint="#8DD339" />
+
     <Button
         android:id="@+id/btnStartService"
         android:layout_width="wrap_content"

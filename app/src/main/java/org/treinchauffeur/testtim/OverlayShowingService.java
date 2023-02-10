@@ -43,6 +43,8 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.treinchauffeur.testtim.io.LocationLogger;
+
 import java.util.Iterator;
 
 public class OverlayShowingService extends Service implements SensorEventListener, LocationListener {
@@ -74,6 +76,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     boolean movable = false;
 
     private PowerManager.WakeLock wakeLock;
+    private LocationLogger locationLogger;
 
     private float speed = 0, speedKmh = 0;
     private boolean hasGPSFix;
@@ -133,12 +136,15 @@ public class OverlayShowingService extends Service implements SensorEventListene
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "TestTim: Main WakeLock");
         wakeLock.acquire();
 
+        locationLogger = new LocationLogger(this);
         createNotification();
         drawLayout();
         setButtonActions();
         placeView();
         doLocationInfo();
         doGraphSetup();
+
+        locationLogger.customMessage("Service Starting..");
 
         return START_STICKY;
     }
@@ -280,7 +286,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
             private float initialTouchY;
 
             @SuppressLint("ClickableViewAccessibility")
-//We're not clicking, we're initiating a window drag
+            //We're not clicking, we're initiating a window drag
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 Log.d(TAG, "onTouch: " + mWindowsParams.x + ", " + mWindowsParams.y);
@@ -379,7 +385,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 }
 
-
+                locationLogger.append(location, hasGPSFix);
                 hasGPSFix = true;
                 String fixTypeText = getString(R.string.gnss_fix);
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
@@ -601,4 +607,16 @@ public class OverlayShowingService extends Service implements SensorEventListene
             graphHider.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        locationLogger.customMessage("Service Stopping..");
+        locationLogger.close();
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        locationLogger.customMessage("Service rebound..");
+        super.onRebind(intent);
+    }
 }
