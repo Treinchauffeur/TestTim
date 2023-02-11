@@ -212,11 +212,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
         btnLeft.setOnClickListener(view -> {
             btnLeft.setTextColor(getColor(R.color.transparent_white));
-            btnRight.setTextColor(Color.parseColor("#888888"));
+            btnRight.setTextColor(getColor(R.color.transparent_gray));
             placedLeft = true;
         });
         btnRight.setOnClickListener(view -> {
-            btnLeft.setTextColor(Color.parseColor("#888888"));
+            btnLeft.setTextColor(getColor(R.color.transparent_gray));
             btnRight.setTextColor(getColor(R.color.transparent_white));
             placedLeft = false;
         });
@@ -348,7 +348,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     if (graph.getChildAt(i) != null) {
                         if (status.getCn0DbHz(i) > 0) {
 
-                            //coloring the bars
+                            //coloring the bars dependant of signal strength
                             if (status.getCn0DbHz(i) >= 30)
                                 graph.getChildAt(i).setBackgroundColor(getColor(R.color.transparent_green));
                             else if (status.getCn0DbHz(i) >= 15 && status.getCn0DbHz(i) < 30)
@@ -376,8 +376,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     Toast.makeText(context, getString(R.string.permission_app_settings), Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 //After restarting device, lastknownlocation is pretty much always null.
-                //Network provider is most likely to have lkl.
+                //Network provider is most likely to have lkl. Se we use that JUST FOR THE TIME BEING.
+                //We assume a gps-provided location will be coming soon, because we're requesting one every 2 seconds.
                 Location location;
                 if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -531,7 +533,19 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.getViewport().setMaxY(viewport);
         graphAccel.getViewport().setYAxisBoundsManual(true);
 
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
+        /**
+         *         Okay, so the android's sensor manager is a royal pain in the back-side.
+         *         Let me explain. There is a delay amount that determines the polling rate of the movement sensors,
+         *         which YOU as the dev can define.
+         *
+         *         However, android rather sees this as a 'suggestion', and often likes to ignore your provided rate.
+         *         In order to combat this, one COULD use NDK (c++ for android, basically) to override this native behaviour
+         *         For now, I'll just remove the train is moving & train is stationary texts below the accelerometer graph,
+         *         since those were flashing about quite a bit when the polling rate went berserk.
+         *
+         *         When the polling rate is respected, 200000 is a nice number of microseconds to wait.
+         */
+        sensorManager.registerListener(this, sensor, 200000); //200000 being the polling delay in microseconds.
 
     }
 
@@ -592,9 +606,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         else if (highest < -0.3 && lowest < -0.3)
             return getString(R.string.train_decel);
         else if (highest - lowest > accelerometerThreshold)
-            return getString(R.string.train_moving);
+            return /*getString(R.string.train_moving);*/ "";
         else
-            return getString(R.string.train_stationary);
+            return /*getString(R.string.train_stationary);*/ "";
     }
 
     //When gps signal is available & reliable, the graph isn't really all that necessary.
