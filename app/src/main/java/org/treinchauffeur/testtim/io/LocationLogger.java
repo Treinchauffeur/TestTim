@@ -20,6 +20,7 @@ public class LocationLogger {
     File file;
     FileWriter fileWriter;
     BufferedWriter writer;
+    Location lastLocation;
 
     @SuppressLint("ConstantLocale")
     public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
@@ -35,7 +36,7 @@ public class LocationLogger {
     public void init() {
         try {
             String dateString = dateFormatter.format(new Date());
-            file = new File(c.getFilesDir().getPath() + "/" + dateString + ".txt");
+            file = new File(c.getFilesDir().getPath() + "/" + dateString + "_TestTim.txt");
 
             if (!file.exists()) {
                 Log.d(TAG, "init: creating file " + file.getPath());
@@ -50,14 +51,24 @@ public class LocationLogger {
     }
 
     public void append(@NonNull Location loc, boolean hasGPS) {
+        if (lastLocation != null) {
+            if (lastLocation.getLatitude() == loc.getLatitude() && lastLocation.getLongitude() == loc.getLongitude() &&
+                    loc.getAccuracy() == lastLocation.getAccuracy()) {
+                Log.d(TAG, "append: Skipping this particular location; is duplicate.");
+                return;
+            }
+        }
         try {
             init();
 
             String dateString = dateTimeFormatter.format(new Date());
-            writer.write(dateString + " " + loc.getLatitude() + " " + loc.getLongitude() + " +-" + (int) loc.getAccuracy() + " " + (loc.hasSpeed() ? ((int) (loc.getSpeed() * 3.6)) : "-1") + " " + (hasGPS ? "GNSS-Fix" : "No-Fix"));
+            writer.write(dateString + " " + loc.getLatitude() + " " + loc.getLongitude() + " +-" + (int) loc.getAccuracy() +
+                    " " + (loc.hasSpeed() ? ((int) (loc.getSpeed() * 3.6)) : "-1") + " " + (hasGPS ? "GNSS-Fix" : "No-Fix"));
             writer.newLine();
 
             close();
+
+            lastLocation = loc;
         } catch (IOException e) {
             Log.e(TAG, "Append: ", e);
         }

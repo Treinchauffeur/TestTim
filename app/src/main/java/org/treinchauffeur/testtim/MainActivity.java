@@ -29,6 +29,7 @@ import org.treinchauffeur.testtim.io.LocationLogger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Date;
 
@@ -43,10 +44,13 @@ public class MainActivity extends AppCompatActivity {
     //Screen recorder stuff
     public MediaProjection mediaProjection;
     public int REC_RQST_CODE = 1312;
+    public static final int JSON_REQUEST_CODE = 1759;
     public MediaProjectionManager mediaManager;
     public VirtualDisplay virtualDisplay;
     public MediaRecorder mediaRecorder;
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
+
+    EditText exportText;
 
     @SuppressWarnings("deprecation")//TODO use a newer api to get display metrics
     @Override
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         EditText etThreshold = findViewById(R.id.etThreshold);
         EditText etViewport = findViewById(R.id.etViewport);
-        EditText exportText = findViewById(R.id.etExportDate);
+        exportText = findViewById(R.id.etExportDate);
 
         service = new OverlayShowingService();
 
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         exportLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + ".txt");
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
                 Log.d(TAG, "onClick: fetching " + file.getPath());
 
                 if (!file.exists()) {
@@ -131,11 +135,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + ".txt");
+                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
                     Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
                     GeoJsonConverter.readFile(toConvert, MainActivity.this);
 
-                    File convertedFile = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_json" + ".json");
+                    File convertedFile = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim_json" + ".json");
                     FileOutputStream out = new FileOutputStream(convertedFile);
                     OutputStreamWriter writer = new OutputStreamWriter(out);
 
@@ -194,6 +198,19 @@ public class MainActivity extends AppCompatActivity {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                     mediaRecorder.getSurface(), null, null);
             mediaRecorder.start();
+        } else if (requestCode == JSON_REQUEST_CODE) {
+            Toast.makeText(mActivity, "Success!", Toast.LENGTH_SHORT).show();
+            try {
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
+                Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
+                GeoJsonConverter.readFile(toConvert, MainActivity.this);
+
+                OutputStream out = getContentResolver().openOutputStream(data.getData());
+                out.write(GeoJsonConverter.convert().getBytes());
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
