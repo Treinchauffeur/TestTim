@@ -54,26 +54,28 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private View overlayView;
     private LocationManager locationManager;
     private WindowManager.LayoutParams mWindowsParams;
-    private SensorManager sensorManager;
-    private Sensor sensor;
+
     public static final String TAG = "OverLayService";
 
+    private SensorManager sensorManager;
+    private Sensor sensor;
+    public static final int SENSOR_POLLING_RATE = 50000;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
     private boolean placedLeft = false;
     private TextView graphText;
-
     double accelerometerThreshold = 0;
     int viewport;
     static double highestYViewable = 0;
-
     double xCorrector = 0, yCorrector = 0;
     float uncorrectedX = 0, uncorrectedY = 0;
     float finalX = 0, finalY = 0;
     static double lowestYViewable = 0;
     static double averageYViewable = 0;
     static double latestAccelValue;
-    boolean movable = false;
+    long lastSensorTimestamp = -1;
+
+    boolean interfaceMovable = false;
 
     private PowerManager.WakeLock wakeLock;
     private LocationLogger locationLogger;
@@ -261,18 +263,18 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView tvMove = overlayView.findViewById(R.id.btnMove);
 
         tvMove.setOnClickListener(view -> {
-            if (movable) {
+            if (interfaceMovable) {
                 tvMove.setText(getString(R.string.unlock));
             } else {
                 tvMove.setText(getString(R.string.lock));
             }
-            movable = !movable;
+            interfaceMovable = !interfaceMovable;
         });
         tvMove.setOnLongClickListener(view -> {
             mWindowsParams.x = 595;
             mWindowsParams.y = 64;
             mWindowManager.updateViewLayout(overlayView, mWindowsParams);
-            movable = false;
+            interfaceMovable = false;
             tvMove.setText(getString(R.string.unlock));
             Toast.makeText(context, R.string.toast_reset_placement, Toast.LENGTH_SHORT).show();
             return true;
@@ -291,7 +293,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
             public boolean onTouch(View v, MotionEvent event) {
                 Log.d(TAG, "onTouch: " + mWindowsParams.x + ", " + mWindowsParams.y);
                 //Ignore input
-                if (!movable) return false;
+                if (!interfaceMovable) return false;
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         initialX = mWindowsParams.x;
@@ -413,7 +415,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     tvFixType.setTextColor(getColor(R.color.transparent_red));
                 }
 
-
                 if (hasGPSFix) {
                     //We deliberately display the lat/long even when there is no current GNSS Fix available,
                     //so that we can see WHERE the signal was lost
@@ -462,6 +463,14 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
+            //Weak attempt to kind of force a reasonable (but very much non-precise) polling-rate.
+            if (lastSensorTimestamp != -1) {
+                if (System.currentTimeMillis() - lastSensorTimestamp < (SENSOR_POLLING_RATE / 1000)) {
+                    return;
+                }
+            }
+            lastSensorTimestamp = System.currentTimeMillis();
+
             /* Sensor data vs the various tablet directions of movement
              * 0: up and down
              * 1: side to side
@@ -489,6 +498,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
             dataToAverage = dataToAverage + ALPHA * (diagonalAxisInput - dataToAverage);
             float average = dataToAverage;
             latestAccelValue = average;
+
 
             //Apply data to graph.
             graphLastAccelXValue += 0.15d;
@@ -533,19 +543,19 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphAccel.getViewport().setMaxY(viewport);
         graphAccel.getViewport().setYAxisBoundsManual(true);
 
-        /**
-         *         Okay, so the android's sensor manager is a royal pain in the back-side.
-         *         Let me explain. There is a delay amount that determines the polling rate of the movement sensors,
-         *         which YOU as the dev can define.
-         *
-         *         However, android rather sees this as a 'suggestion', and often likes to ignore your provided rate.
-         *         In order to combat this, one COULD use NDK (c++ for android, basically) to override this native behaviour
-         *         For now, I'll just remove the train is moving & train is stationary texts below the accelerometer graph,
-         *         since those were flashing about quite a bit when the polling rate went berserk.
-         *
-         *         When the polling rate is respected, 200000 is a nice number of microseconds to wait.
+        /*
+                  Okay, so the android's sensor manager is a royal pain in the back-side.
+                  Let me explain. There is a delay amount that determines the polling rate of the movement sensors,
+                  which YOU as the dev can define.
+
+                  However, android rather sees this as a 'suggestion', and often likes to ignore your provided rate.
+                  In order to combat this, one COULD use NDK (c++ for android, basically) to override this native behaviour
+                  For now, I'll just remove the train is moving & train is stationary texts below the accelerometer graph,
+                  since those were flashing about quite a bit when the polling rate went berserk.
+
+                  When the polling rate is respected, 200000 is a nice number of microseconds to wait.
          */
-        sensorManager.registerListener(this, sensor, 200000); //200000 being the polling delay in microseconds.
+        sensorManager.registerListener(this, sensor, SENSOR_POLLING_RATE); //200000 being the polling delay in microseconds.
 
     }
 
@@ -624,7 +634,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
     @Override
     public boolean onUnbind(Intent intent) {
         locationLogger.customMessage("Service Stopping..");
-        locationLogger.close();
         return super.onUnbind(intent);
     }
 
