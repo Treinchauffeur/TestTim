@@ -59,7 +59,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     private SensorManager sensorManager;
     private Sensor sensor;
-    public static final int SENSOR_POLLING_RATE = 50000;
+    public static final int SENSOR_POLLING_RATE = 30000;
     private LineGraphSeries<DataPoint> mSeriesAccelX, mSeriesAccelY, mSeriesAccelZ;
     private double graphLastAccelXValue = 5d;
     private boolean placedLeft = false;
@@ -464,11 +464,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
             //Weak attempt to kind of force a reasonable (but very much non-precise) polling-rate.
-            if (lastSensorTimestamp != -1) {
-                if (System.currentTimeMillis() - lastSensorTimestamp < (SENSOR_POLLING_RATE / 1000)) {
-                    return;
-                }
-            }
+            if (lastSensorTimestamp != -1 && System.currentTimeMillis() - lastSensorTimestamp < (SENSOR_POLLING_RATE / 1000)) //converting micros to millis
+                return;
+
             lastSensorTimestamp = System.currentTimeMillis();
 
             /* Sensor data vs the various tablet directions of movement
