@@ -11,6 +11,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -139,7 +140,9 @@ public class MainActivity extends AppCompatActivity {
                     Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
                     GeoJsonConverter.readFile(toConvert, MainActivity.this);
 
-                    File convertedFile = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim_json" + ".json");
+                    File exportPath = new File(Environment.getExternalStorageDirectory() + "/TestTim logs/");
+                    if (!exportPath.exists()) exportPath.mkdirs();
+                    File convertedFile = new File(exportPath, exportText.getText() + "_TestTim_json" + ".json");
                     FileOutputStream out = new FileOutputStream(convertedFile);
                     OutputStreamWriter writer = new OutputStreamWriter(out);
 
@@ -147,13 +150,7 @@ public class MainActivity extends AppCompatActivity {
                     writer.close();
                     out.close();
 
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri uri = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", convertedFile);
-                    intent.setDataAndType(uri, "text/plain");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    startActivity(intent);
+                    Toast.makeText(mActivity, "Saved to: " + convertedFile.getPath(), Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
