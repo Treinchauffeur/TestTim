@@ -16,6 +16,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManager;
 import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,8 +24,8 @@ import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -53,6 +54,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     private WindowManager mWindowManager;
     private View overlayView;
     private LocationManager locationManager;
+    private DisplayManager displayManager;
     private WindowManager.LayoutParams mWindowsParams;
 
     public static final String TAG = "OverLayService";
@@ -77,7 +79,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     boolean interfaceMovable = false;
 
-    private PowerManager.WakeLock wakeLock;
     private LocationLogger locationLogger;
 
     private float speed = 0, speedKmh = 0;
@@ -120,7 +121,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return sum / count;
     }
 
-    @SuppressWarnings("deprecation") //Android doesn't like us deploying a full wake-lock
     @SuppressLint("WakelockTimeout")
     //As long as service is active, we don't want the screen to timeout.
     @Override
@@ -129,6 +129,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
 
         accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
         viewport = intent.getIntExtra("viewport", 2);
@@ -150,9 +151,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onDestroy() {
         if (overlayView != null)
             mWindowManager.removeView(overlayView);
-        if (wakeLock != null)
-            wakeLock.release();
-
         super.onDestroy();
     }
 
@@ -384,7 +382,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 }
 
-                locationLogger.append(location, hasGPSFix);
+
+                if (screenOn())
+                    locationLogger.append(location, hasGPSFix);
+
                 hasGPSFix = true;
                 String fixTypeText = getString(R.string.gnss_fix);
                 if ((System.currentTimeMillis() - location.getTime()) > 2000) {
@@ -612,6 +613,17 @@ public class OverlayShowingService extends Service implements SensorEventListene
             return /*getString(R.string.train_moving);*/ "";
         else
             return /*getString(R.string.train_stationary);*/ "";
+    }
+
+    /**
+     * We don't want to keep logging locations when the screen is off.
+     */
+    private boolean screenOn() {
+        for (Display display : displayManager.getDisplays()) {
+            Log.d(TAG, "screenOn state: " + display.getState());
+            return display.getState() == Display.STATE_ON;
+        }
+        return false;
     }
 
     //When gps signal is available & reliable, the graph isn't really all that necessary.

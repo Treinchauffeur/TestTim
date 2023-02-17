@@ -22,7 +22,7 @@ public class LocationLogger {
     BufferedWriter writer;
     Location lastLocation;
 
-    public static final String logFileSuffix = "_TestTim1.txt";
+    public static final String logFileSuffix = "_TestTim.txt";
     public static final String jsonFileSuffix = "_TestTim_json.json";
 
     @SuppressLint("ConstantLocale")
