@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         exportLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
                 Log.d(TAG, "onClick: fetching " + file.getPath());
 
                 if (!file.exists()) {
@@ -136,13 +136,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
+                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
                     Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
                     GeoJsonConverter.readFile(toConvert, MainActivity.this);
 
                     File exportPath = new File(Environment.getExternalStorageDirectory() + "/TestTim logs/");
                     if (!exportPath.exists()) exportPath.mkdirs();
-                    File convertedFile = new File(exportPath, exportText.getText() + "_TestTim_json" + ".json");
+                    File convertedFile = new File(exportPath, exportText.getText() + LocationLogger.jsonFileSuffix);
                     FileOutputStream out = new FileOutputStream(convertedFile);
                     OutputStreamWriter writer = new OutputStreamWriter(out);
 
@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == JSON_REQUEST_CODE) {
             Toast.makeText(mActivity, "Success!", Toast.LENGTH_SHORT).show();
             try {
-                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + "_TestTim.txt");
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
                 Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
                 GeoJsonConverter.readFile(toConvert, MainActivity.this);
 

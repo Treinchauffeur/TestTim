@@ -603,7 +603,8 @@
                         android:layout_height="match_parent"
                         android:layout_marginStart="-60dp"
                         android:background="#11ffffff"
-                        android:gravity="bottom" />
+                        android:gravity="bottom"
+                        android:hardwareAccelerated="true" />
 
                 </RelativeLayout>
 

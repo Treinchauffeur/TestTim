@@ -127,16 +127,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public int onStartCommand(Intent intent, int flags, int startId) {
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
         viewport = intent.getIntExtra("viewport", 2);
-
-        //Because passing a KEEP_SCREEN_ON parameter to a window service (inst of an Activity) is apparently super-duper illegal.
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "TestTim: Main WakeLock");
-        wakeLock.acquire();
 
         locationLogger = new LocationLogger(this);
         createNotification();

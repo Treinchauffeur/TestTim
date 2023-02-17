@@ -35,13 +35,16 @@ public class GeoJsonConverter {
                 double lat, lng;
                 int accuracy, speed;
                 boolean gpsFix;
+                String timeDate;
+
+                timeDate = line.split(" ")[0] + " " + line.split(" ")[1];
                 lat = Double.parseDouble(line.split(" ")[2]);
                 lng = Double.parseDouble(line.split(" ")[3]);
-                accuracy = Integer.parseInt(line.split(" ")[4].split("-")[1]);
+                accuracy = Integer.parseInt(line.split(" ")[4].split("-")[1]); //get rid of +- symbols
                 speed = Integer.parseInt(line.split(" ")[5]);
                 gpsFix = line.split(" ")[6].equalsIgnoreCase("GNSS-fix");
 
-                Spot s = new Spot(lat, lng, accuracy, speed, gpsFix);
+                Spot s = new Spot(lat, lng, accuracy, speed, gpsFix, timeDate);
                 spots.add(s);
             }
         } catch (IOException e) {
@@ -69,8 +72,9 @@ public class GeoJsonConverter {
                 geometryObj.put("type", "Point");
 
                 JSONObject propsObj = new JSONObject();
-                propsObj.put("accuracy", s.accuracy);
-                propsObj.put("speed", s.speed);
+                propsObj.put("Time Date", s.timeDate);
+                propsObj.put("Accuracy", s.accuracy);
+                propsObj.put("Speed", s.speed);
                 propsObj.put("GNSS-fix", s.gpsFix);
 
                 geoObj.put("geometry", geometryObj);
@@ -93,6 +97,7 @@ public class GeoJsonConverter {
         public double lat, lng;
         public int accuracy, speed;
         boolean gpsFix;
+        String timeDate;
 
         public Spot(double lat, double lng, int accuracy, int speed, boolean gpsFix) {
             this.lat = lat;
@@ -100,6 +105,15 @@ public class GeoJsonConverter {
             this.accuracy = accuracy;
             this.speed = speed;
             this.gpsFix = gpsFix;
+        }
+
+        public Spot(double lat, double lng, int accuracy, int speed, boolean gpsFix, String timeDate) {
+            this.lat = lat;
+            this.lng = lng;
+            this.accuracy = accuracy;
+            this.speed = speed;
+            this.gpsFix = gpsFix;
+            this.timeDate = timeDate;
         }
     }
 }

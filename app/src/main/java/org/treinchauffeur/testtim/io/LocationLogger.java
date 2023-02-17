@@ -22,6 +22,9 @@ public class LocationLogger {
     BufferedWriter writer;
     Location lastLocation;
 
+    public static final String logFileSuffix = "_TestTim1.txt";
+    public static final String jsonFileSuffix = "_TestTim_json.json";
+
     @SuppressLint("ConstantLocale")
     public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
     SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
@@ -36,7 +39,7 @@ public class LocationLogger {
     public void init() {
         try {
             String dateString = dateFormatter.format(new Date());
-            file = new File(c.getFilesDir().getPath() + "/" + dateString + "_TestTim.txt");
+            file = new File(c.getFilesDir().getPath() + "/" + dateString + logFileSuffix);
 
             if (!file.exists()) {
                 Log.d(TAG, "init: creating file " + file.getPath());
