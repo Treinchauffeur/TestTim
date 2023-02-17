@@ -99,14 +99,6 @@ public class GeoJsonConverter {
         boolean gpsFix;
         String timeDate;
 
-        public Spot(double lat, double lng, int accuracy, int speed, boolean gpsFix) {
-            this.lat = lat;
-            this.lng = lng;
-            this.accuracy = accuracy;
-            this.speed = speed;
-            this.gpsFix = gpsFix;
-        }
-
         public Spot(double lat, double lng, int accuracy, int speed, boolean gpsFix, String timeDate) {
             this.lat = lat;
             this.lng = lng;

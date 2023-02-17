@@ -15,7 +15,6 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -67,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         mActivity = this;
         Button btnStartService = findViewById(R.id.btnStartService);
         Button exportLogs = findViewById(R.id.exportLogs);
-        Button btnRec = findViewById(R.id.recInit);
         Button exportJSON = findViewById(R.id.exportJson);
 
         EditText etThreshold = findViewById(R.id.etThreshold);
@@ -110,52 +108,47 @@ public class MainActivity extends AppCompatActivity {
 
         exportText.setText(LocationLogger.dateFormatter.format(new Date()));
 
-        exportLogs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
-                Log.d(TAG, "onClick: fetching " + file.getPath());
+        exportLogs.setOnClickListener(view -> {
+            File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
+            Log.d(TAG, "onClick: fetching " + file.getPath());
 
-                if (!file.exists()) {
-                    Toast.makeText(mActivity, "File doesn't exist for this day; format DD-MM-YYYY", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "onClick: File doesn't exist.");
-                    return;
-                }
-
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri uri = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
-                intent.setDataAndType(uri, "text/plain");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                startActivity(intent);
+            if (!file.exists()) {
+                Toast.makeText(mActivity, "File doesn't exist for this day; format DD-MM-YYYY", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onClick: File doesn't exist.");
+                return;
             }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri uri = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
+            intent.setDataAndType(uri, "text/plain");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(intent);
         });
 
-        exportJSON.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
-                    Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
-                    GeoJsonConverter.readFile(toConvert, MainActivity.this);
+        exportJSON.setOnClickListener(view -> {
+            try {
+                File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
+                Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);
+                GeoJsonConverter.readFile(toConvert, MainActivity.this);
 
-                    File exportPath = new File(Environment.getExternalStorageDirectory() + "/TestTim logs/");
-                    if (!exportPath.exists()) exportPath.mkdirs();
-                    File convertedFile = new File(exportPath, exportText.getText() + LocationLogger.jsonFileSuffix);
-                    FileOutputStream out = new FileOutputStream(convertedFile);
-                    OutputStreamWriter writer = new OutputStreamWriter(out);
+                File exportPath = new File(Environment.getExternalStorageDirectory() + "/TestTim logs/");
+                if (!exportPath.exists()) //noinspection ResultOfMethodCallIgnored
+                    exportPath.mkdirs();
+                File convertedFile = new File(exportPath, exportText.getText() + LocationLogger.jsonFileSuffix);
+                FileOutputStream out = new FileOutputStream(convertedFile);
+                OutputStreamWriter writer = new OutputStreamWriter(out);
 
-                    writer.write(GeoJsonConverter.convert());
-                    writer.close();
-                    out.close();
+                writer.write(GeoJsonConverter.convert());
+                writer.close();
+                out.close();
 
-                    Toast.makeText(mActivity, "Saved to: " + convertedFile.getPath(), Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                Toast.makeText(mActivity, "Saved to: " + convertedFile.getPath(), Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         });
     }
 
