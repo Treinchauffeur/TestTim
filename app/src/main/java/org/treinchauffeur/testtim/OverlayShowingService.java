@@ -620,7 +620,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
      */
     private boolean screenOn() {
         for (Display display : displayManager.getDisplays()) {
-            Log.d(TAG, "screenOn state: " + display.getState());
             return display.getState() == Display.STATE_ON;
         }
         return false;
