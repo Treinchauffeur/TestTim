@@ -5,8 +5,6 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -53,7 +51,11 @@ public class LocationLogger {
         }
     }
 
-    public void append(@NonNull Location loc, boolean hasGPS) {
+    public void append(Location loc, boolean hasGPS) {
+        if (loc == null) {
+            Log.e(TAG, "append: Location to log is null");
+            return;
+        }
         if (lastLocation != null) {
             if (lastLocation.getLatitude() == loc.getLatitude() && lastLocation.getLongitude() == loc.getLongitude() &&
                     loc.getAccuracy() == lastLocation.getAccuracy()) {

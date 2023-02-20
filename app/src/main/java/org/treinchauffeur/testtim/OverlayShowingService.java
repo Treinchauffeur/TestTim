@@ -374,83 +374,87 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
                 //After restarting device, lastknownlocation is pretty much always null.
                 //Network provider is most likely to have lkl. Se we use that JUST FOR THE TIME BEING.
-                //We assume a gps-provided location will be coming soon, because we're requesting one every 2 seconds.
+                //We assume a gps-provided location will be coming soon since we're requesting it & we have the permissions.
                 Location location;
                 if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                } else if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) == null) {
+                    location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                 } else {
                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 }
 
+                if (location != null) {
+                    if (screenOn())
+                        locationLogger.append(location, hasGPSFix);
 
-                if (screenOn())
-                    locationLogger.append(location, hasGPSFix);
-
-                hasGPSFix = true;
-                String fixTypeText = getString(R.string.gnss_fix);
-                if ((System.currentTimeMillis() - location.getTime()) > 2000) {
-                    //The last known fix is too old, and therefor we conclude that we currently don't have one
-                    tvFixType.setText(fixTypeText + getString(R.string.none));
-                    tvFixType.setTextColor(getColor(R.color.transparent_red));
-                    tvLatLong.setTextColor(getColor(R.color.transparent_gray));
-                    tvElevation.setTextColor(getColor(R.color.transparent_gray));
-                    tvAccuracy.setTextColor(getColor(R.color.transparent_gray));
-                    tvSpeed.setTextColor(getColor(R.color.transparent_gray));
-                    hasGPSFix = false;
-                } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
-                    //If we don't have altitude, or it's unreasonably high (let's say 200m for now, we consider this to be in error), fix is 2D.
-                    tvFixType.setText(fixTypeText + "2D");
-                    tvFixType.setTextColor(getColor(R.color.transparent_yellow));
-                } else if (location.getAltitude() < 200) {
-                    //Best-case scenario. We have altitude, and we consider this to have a reasonable value.
-                    tvFixType.setText(fixTypeText + "3D");
-                    tvFixType.setTextColor(getColor(R.color.transparent_green));
-                } else {
-                    //Don't think this scenario can exist, but let's be certain
-                    tvFixType.setText(fixTypeText + getString(R.string.error));
-                    tvFixType.setTextColor(getColor(R.color.transparent_red));
-                }
-
-                if (hasGPSFix) {
-                    //We deliberately display the lat/long even when there is no current GNSS Fix available,
-                    //so that we can see WHERE the signal was lost
-                    tvLatLong.setTextColor(getColor(R.color.transparent_white));
-                    tvLatLong.setText(getString(R.string.pos) +
-                            location.getLatitude() + ", " + location.getLongitude());
-
-                    //We assume that the location is inaccurate when the altitude is above 200m
-                    //I mean this is the Netherlands after all
-                    if (location.hasAltitude()) {
-                        tvElevation.setText(getString(R.string.elevation) + (int) location.getAltitude() + "m");
-                        if (location.getAltitude() >= 200)
-                            tvElevation.setTextColor(getColor(R.color.transparent_red));
-                        else
-                            tvElevation.setTextColor(getColor(R.color.transparent_white));
-
+                    hasGPSFix = true;
+                    String fixTypeText = getString(R.string.gnss_fix);
+                    if ((System.currentTimeMillis() - location.getTime()) > 2000) {
+                        //The last known fix is too old, and therefor we conclude that we currently don't have one
+                        tvFixType.setText(fixTypeText + getString(R.string.none));
+                        tvFixType.setTextColor(getColor(R.color.transparent_red));
+                        tvLatLong.setTextColor(getColor(R.color.transparent_gray));
+                        tvElevation.setTextColor(getColor(R.color.transparent_gray));
+                        tvAccuracy.setTextColor(getColor(R.color.transparent_gray));
+                        tvSpeed.setTextColor(getColor(R.color.transparent_gray));
+                        hasGPSFix = false;
+                    } else if (!location.hasAltitude() || location.getAltitude() >= 200) {
+                        //If we don't have altitude, or it's unreasonably high (let's say 200m for now, we consider this to be in error), fix is 2D.
+                        tvFixType.setText(fixTypeText + "2D");
+                        tvFixType.setTextColor(getColor(R.color.transparent_yellow));
+                    } else if (location.getAltitude() < 200) {
+                        //Best-case scenario. We have altitude, and we consider this to have a reasonable value.
+                        tvFixType.setText(fixTypeText + "3D");
+                        tvFixType.setTextColor(getColor(R.color.transparent_green));
+                    } else {
+                        //Don't think this scenario can exist, but let's be certain
+                        tvFixType.setText(fixTypeText + getString(R.string.error));
+                        tvFixType.setTextColor(getColor(R.color.transparent_red));
                     }
 
-                    //TimTim won't use the location when accuracy exceeds 50m, so we DO use it, but draw it in red
-                    tvAccuracy.setText(getString(R.string.accuracy) + (int) location.getAccuracy() + "m");
-                    if (location.getAccuracy() > 50)
-                        tvAccuracy.setTextColor(getColor(R.color.transparent_red));
-                    else
-                        tvAccuracy.setTextColor(getColor(R.color.transparent_white));
+                    if (hasGPSFix) {
+                        //We deliberately display the lat/long even when there is no current GNSS Fix available,
+                        //so that we can see WHERE the signal was lost
+                        tvLatLong.setTextColor(getColor(R.color.transparent_white));
+                        tvLatLong.setText(getString(R.string.pos) +
+                                location.getLatitude() + ", " + location.getLongitude());
 
-                    //Pretty basic, displays the GNSS-provided speed
-                    if (location.hasSpeed()) {
-                        setSpeed(location.getSpeed());
-                        tvSpeed.setText(getString(R.string.speed) + (int) speedKmh + getString(R.string.space_kmh));
-                        tvSpeed.setTextColor(getColor(R.color.transparent_white));
-                    } else {
-                        setSpeed(-1);
-                        tvSpeed.setText(getString(R.string.speed) + getString(R.string.nan));
-                        tvSpeed.setTextColor(getColor(R.color.transparent_gray));
+                        //We assume that the location is inaccurate when the altitude is above 200m
+                        //I mean this is the Netherlands after all
+                        if (location.hasAltitude()) {
+                            tvElevation.setText(getString(R.string.elevation) + (int) location.getAltitude() + "m");
+                            if (location.getAltitude() >= 200)
+                                tvElevation.setTextColor(getColor(R.color.transparent_red));
+                            else
+                                tvElevation.setTextColor(getColor(R.color.transparent_white));
+
+                        }
+
+                        //TimTim won't use the location when accuracy exceeds 50m, so we DO use it, but draw it in red
+                        tvAccuracy.setText(getString(R.string.accuracy) + (int) location.getAccuracy() + "m");
+                        if (location.getAccuracy() > 50)
+                            tvAccuracy.setTextColor(getColor(R.color.transparent_red));
+                        else
+                            tvAccuracy.setTextColor(getColor(R.color.transparent_white));
+
+                        //Pretty basic, displays the GNSS-provided speed
+                        if (location.hasSpeed()) {
+                            setSpeed(location.getSpeed());
+                            tvSpeed.setText(getString(R.string.speed) + (int) speedKmh + getString(R.string.space_kmh));
+                            tvSpeed.setTextColor(getColor(R.color.transparent_white));
+                        } else {
+                            setSpeed(-1);
+                            tvSpeed.setText(getString(R.string.speed) + getString(R.string.nan));
+                            tvSpeed.setTextColor(getColor(R.color.transparent_gray));
+                        }
                     }
                 }
             }
         };
 
-        //Registers a GNSS callback listener (GnssStatus.Callback status) & generic location listener (this class)
+        //Registers a GNSS callback listener (GnssStatus.Callback status) &
+        //requests continuous location updates via GPS (assigned to an empty location change listener)
         locationManager.registerGnssStatusCallback(context.getMainExecutor(), status);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
     }
