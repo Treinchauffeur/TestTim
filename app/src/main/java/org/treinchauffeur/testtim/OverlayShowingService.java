@@ -121,8 +121,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return sum / count;
     }
 
-    @SuppressLint("WakelockTimeout")
-    //As long as service is active, we don't want the screen to timeout.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -143,7 +141,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
         doGraphSetup();
 
         locationLogger.customMessage("Service Starting..");
-
         return START_STICKY;
     }
 
@@ -151,6 +148,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onDestroy() {
         if (overlayView != null)
             mWindowManager.removeView(overlayView);
+        locationLogger.customMessage("Service Stopping..");
         super.onDestroy();
     }
 
@@ -193,6 +191,9 @@ public class OverlayShowingService extends Service implements SensorEventListene
         overlayView = layoutInflater.inflate(R.layout.overlay_window, null);//null because we have no root view
     }
 
+    /**
+     * Sets onClickListeners to pretty much all the buttons on the overlay.
+     */
     private void setButtonActions() {
         TextView btnClose = overlayView.findViewById(R.id.btnClose);
         TextView btnCalibrate = overlayView.findViewById(R.id.calibrate);
@@ -234,8 +235,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
     }
 
-    //Does what it says on the tin; places the view.
-    //Also sets window parameters, configures SOME buttons; the Move lock/unlock button as well as the Close button
+    /**
+     * Does what it says on the tin; places the view.
+     * Also sets window parameters, configures SOME buttons; the Move lock/unlock button as well as the Close button.
+     */
     @SuppressLint("RtlHardcoded") //We're not working with right-to-left interfaces
     private void placeView() {
         int width = 300;
@@ -307,7 +310,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
         });
     }
 
-    //Handles all the location data. Everything from displaying the GNSS data to getting and calculating the speed
+
+    /**
+     * Handles all the location data. Everything from displaying the GNSS data to getting and calculating the speed.
+     */
     private void doLocationInfo() {
         ViewGroup graph = overlayView.findViewById(R.id.signalStrengthGraph);
         TextView tvFixType = overlayView.findViewById(R.id.tvFixType);
@@ -459,6 +465,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, context.getMainExecutor(), this);
     }
 
+    /**
+     * Handles accelerometer graph inputs
+     *
+     * @param event the sensor data
+     */
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -513,8 +524,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
         graphText.setText(getIsAcceleratingText(highestYViewable, lowestYViewable));
     }
 
-    //Setup the graph style, and start listening for accelerometer value changes.
-    //We have an on-board onchangelistener implemented for this reason.
+
+    /**
+     * Setup the graph style, and start listening for accelerometer value changes.
+     * We have an on-board onchangelistener implemented for this reason.
+     */
     private void doGraphSetup() {
         GraphView graphAccel = initGraph(R.id.graphAccel);
         graphAccel.getLegendRenderer().setVisible(false);
@@ -630,8 +644,10 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return false;
     }
 
-    //When gps signal is available & reliable, the graph isn't really all that necessary.
-    //So in order to take away any possible distraction, we 'hide' the graph with a semi-transparent black overlay.
+    /**
+     * When gps signal is available & reliable, the graph isn't really all that necessary.
+     * So in order to take away any possible distraction, we 'hide' the graph with a semi-transparent black overlay.
+     */
     private void doHideGraph() {
         View graphHider = overlayView.findViewById(R.id.graphHider);
         if (hasGPSFix && speed > 5)
