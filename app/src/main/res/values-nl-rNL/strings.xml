@@ -14,6 +14,12 @@
     <string name="left">LINKS</string>
     <string name="right">RECHTS</string>
     <string name="space_kmh">" km/u"</string>
+    <string name="start_overlay">Start TestTim</string>
+    <string name="viewport">Viewport</string>
+    <string name="graph_viewport">Grafiek viewport</string>
+    <string name="train_moving_threshold">Versnellingsmeter \'trein beweegt\' drempelwaarde</string>
+    <string name="export_location_logs">Exporteer locatie-logbestand</string>
+    <string name="export_json">Exporteer locatie-data in GeoJSON</string>
 
     <!-- Graph text -->
     <string name="at_speed">V > 5m/s</string>
@@ -29,4 +35,7 @@
     <string name="none">Geen</string>
     <string name="error">Fout</string>
     <string name="set_calibration">Calibreer</string>
+
+    <!-- Notifications -->
+    <string name="active_in_background">Deze melding garandeert het functioneren van TestTim. De melding blijft daarom actief in de achtergrond.</string>
 </resources>

@@ -20,6 +20,12 @@
     <string name="nan" translatable="false">NaN</string>
     <string name="space_kmh">" km/h"</string>
     <string name="accelerometer">"Accelerometer"</string>
+    <string name="start_overlay">Start TestTim</string>
+    <string name="viewport">Viewport</string>
+    <string name="graph_viewport">Graph viewport</string>
+    <string name="train_moving_threshold">Accelerometer \'train is moving\' threshold</string>
+    <string name="export_location_logs">Export location logfiles</string>
+    <string name="export_json">Export location data to GeoJSON</string>
 
 
     <!-- Graph text -->
@@ -34,5 +40,8 @@
     <string name="permission_app_settings">Please allow location permissions in app settings</string>
     <string name="none">None</string>
     <string name="error">Error</string>
+
+    <!-- Notifications -->
+    <string name="active_in_background">This notification guarantees functioning of TestTim. Therefore it must stay active.</string>
 
 </resources>

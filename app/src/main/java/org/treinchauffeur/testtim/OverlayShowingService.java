@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -174,8 +175,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
         builder.setChannelId(CHANNEL_ID);
         builder.setBadgeIconType(NotificationCompat.BADGE_ICON_NONE);
 
-        builder.setContentTitle("TestTim");
-        builder.setContentText("Stays active in background");
+        builder.setContentTitle(getString(R.string.app_name));
+        builder.setContentText(getString(R.string.active_in_background));
         Uri notificationSound = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_NOTIFICATION);
         builder.setSound(notificationSound);
         builder.setAutoCancel(false);
@@ -200,7 +201,11 @@ public class OverlayShowingService extends Service implements SensorEventListene
         TextView btnResetCalibration = overlayView.findViewById(R.id.calibrateReset);
         graphText = overlayView.findViewById(R.id.graphText);
 
-        btnClose.setOnClickListener(view -> stopSelf());
+        btnClose.setOnClickListener(view -> {
+            stopSelf();
+            stopForeground(true);
+            onDestroy();
+        });
 
         //Tablet placement in cab, inverts accelerometer outputs
         TextView btnLeft = overlayView.findViewById(R.id.placedLeft);
@@ -227,12 +232,6 @@ public class OverlayShowingService extends Service implements SensorEventListene
             yCorrector = 0;
             btnCalibrate.setTextColor(getColor(R.color.transparent_white));
         });
-
-        TextView recStart = overlayView.findViewById(R.id.tvRec);
-        recStart.setOnClickListener(v -> {
-            //recordingStart(); //TODO This entire crap
-        });
-
     }
 
     /**
@@ -287,7 +286,18 @@ public class OverlayShowingService extends Service implements SensorEventListene
             //We're not clicking, we're initiating a window drag
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "onTouch: " + mWindowsParams.x + ", " + mWindowsParams.y);
+                //Touch in outside of view bounds, get rid of focus
+                if(!isViewInBounds(v, (int) event.getRawX(), (int) event.getRawY())) {
+                    mWindowsParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+                    mWindowManager.updateViewLayout(v, mWindowsParams);
+                    return false;
+                }
+
+                mWindowsParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+                mWindowManager.updateViewLayout(v, mWindowsParams);
+
                 //Ignore input
                 if (!interfaceMovable) return false;
                 switch (event.getAction()) {
@@ -558,7 +568,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
         /*
                   Okay, so the android's sensor manager is a royal pain in the back-side.
                   Let me explain. There is a delay amount that determines the polling rate of the movement sensors,
-                  which YOU as the dev can define.
+                  which YOU, as the dev, can define.
 
                   However, android rather sees this as a 'suggestion', and often likes to ignore your provided rate.
                   In order to combat this, one COULD use NDK (c++ for android, basically) to override this native behaviour
@@ -587,7 +597,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
         //Might be a duplicate call, but probably still necessary
     }
 
-    //Initiate the series (individual lines, of which we only use one)
+    /**
+     * Initiate the series (our line, basically)
+     * @param color color of the series in an integer format
+     * @param title the title of the series, we do nothing with this
+     * @return the series to return to the graph
+     */
     public LineGraphSeries<DataPoint> initSeries(int color, String title) {
         LineGraphSeries<DataPoint> series;
         series = new LineGraphSeries<>();
@@ -599,13 +614,20 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return series;
     }
 
-    //Setting the speed in a global value.
+    /**
+     * We like to use global variables to access the speed
+     * @param speed the input speed in m/s
+     */
     public void setSpeed(float speed) {
         this.speed = speed;
         this.speedKmh = (float) (speed * 3.6);
     }
 
-    //Initiate the Graph
+    /**
+     * Initiating the graph
+     * @param id
+     * @return
+     */
     public GraphView initGraph(int id) {
         GraphView graph = overlayView.findViewById(id);
         graph.getViewport().setXAxisBoundsManual(true);
@@ -617,8 +639,13 @@ public class OverlayShowingService extends Service implements SensorEventListene
         return graph;
     }
 
-    //Gets the  text to display on the graph based on whether we have GPS (and therefor a known speed), or the accelerometer
-    //that the train is generally moving, or specifically accelerating, decelerating or stationary.
+    /**
+     * Gets the  text to display on the graph based on whether we have GPS (and therefor a known speed), or the accelerometer
+     * that the train is generally moving, or specifically accelerating, decelerating or stationary.
+     * @param highest highest speed recorded
+     * @param lowest lowest speed recorded
+     * @return whether the train is moving or stationary
+     */
     private String getIsAcceleratingText(double highest, double lowest) {
         doHideGraph();
         if (hasGPSFix && speed > 5)
@@ -666,5 +693,22 @@ public class OverlayShowingService extends Service implements SensorEventListene
     public void onRebind(Intent intent) {
         locationLogger.customMessage("Service rebound..");
         super.onRebind(intent);
+    }
+
+    /**
+     * We want to know whether a certain coordinate-set is in bounds of our pop-up window. We have to know this
+     * to properly catch and release the window focus.
+     * @param view our window
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return whether a certain coordinate-set is in bounds of our pop-up window or not.
+     */
+    private boolean isViewInBounds(View view, int x, int y) {
+        Rect outRect  = new Rect();
+        int[] location = new int[2];
+        view.getDrawingRect(outRect);
+        view.getLocationOnScreen(location);
+        outRect.offset(location[0], location[1]);
+        return outRect.contains(x, y);
     }
 }

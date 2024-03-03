@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,71 +10,67 @@
     android:paddingRight="16dp"
     android:paddingTop="16dp"
     android:orientation="vertical"
+    android:gravity="center"
     tools:context=".MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Accelerometer 'train is moving' threshold" />
-
-    <EditText
-        android:id="@+id/etThreshold"
-        android:text="0.2"
-        android:hint="Accelerometer threshold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="10dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Graph viewport" />
-
-    <EditText
-        android:id="@+id/etViewport"
-        android:text="1"
-        android:hint="Viewport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="10dp" />
-
-    <Button
-        android:id="@+id/recInit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Initiate screencap"
-        android:backgroundTint="#882222" />
 
     <EditText
         android:id="@+id/etExportDate"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:hint="12-31-9999" />
 
     <Button
         android:id="@+id/exportLogs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Export location logs"
-        android:backgroundTint="#8DD339" />
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:text="@string/export_location_logs"/>
 
     <Button
         android:id="@+id/exportJson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Export JSON"
-        android:backgroundTint="#8DD339" />
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:text="@string/export_json"/>
 
-    <Button
+    <TextView
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/train_moving_threshold" />
+
+    <EditText
+        android:id="@+id/etThreshold"
+        android:text="0.2"
+        android:hint="Accelerometer threshold"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/graph_viewport" />
+
+    <EditText
+        android:id="@+id/etViewport"
+        android:text="1"
+        android:hint="@string/viewport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:gravity="center"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStartService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/tvValue"
-        android:text="Start Overlay Service" />
-
+        app:icon="@drawable/baseline_power_settings_new_24"
+        android:text="@string/start_overlay" />
 
 </LinearLayout>
