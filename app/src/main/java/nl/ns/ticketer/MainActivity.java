@@ -1,4 +1,4 @@
-package org.treinchauffeur.testtim;
+package nl.ns.ticketer;
 
 import android.Manifest;
 import android.app.Activity;
@@ -14,13 +14,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import org.treinchauffeur.testtim.io.GeoJsonConverter;
-import org.treinchauffeur.testtim.io.LocationLogger;
+import nl.ns.ticketer.io.GeoJsonConverter;
+import nl.ns.ticketer.io.LocationLogger;
 
 import java.io.File;
 import java.io.IOException;

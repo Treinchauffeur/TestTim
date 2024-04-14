@@ -1,4 +1,4 @@
-package org.treinchauffeur.testtim.io;
+package nl.ns.ticketer.io;
 
 import android.content.Context;
 import android.net.Uri;

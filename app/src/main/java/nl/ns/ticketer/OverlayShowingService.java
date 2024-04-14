@@ -1,4 +1,4 @@
-package org.treinchauffeur.testtim;
+package nl.ns.ticketer;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -25,7 +25,6 @@ import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -45,7 +44,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import org.treinchauffeur.testtim.io.LocationLogger;
+import nl.ns.ticketer.io.LocationLogger;
 
 import java.util.Iterator;
 
@@ -132,6 +131,12 @@ public class OverlayShowingService extends Service implements SensorEventListene
 
         accelerometerThreshold = intent.getDoubleExtra("threshold", 0);
         viewport = intent.getIntExtra("viewport", 2);
+
+        //If we don't have location permissions, request them from the user
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, getString(R.string.permission_app_settings), Toast.LENGTH_SHORT).show();
+            return Service.START_NOT_STICKY;
+        }
 
         locationLogger = new LocationLogger(this);
         createNotification();
@@ -383,7 +388,7 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
 
                 //If we don't have location permissions, request them from the user
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(context, getString(R.string.permission_app_settings), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -401,8 +406,8 @@ public class OverlayShowingService extends Service implements SensorEventListene
                 }
 
                 if (location != null) {
-                    if (screenOn())
-                        locationLogger.append(location, hasGPSFix);
+                    //We're logging the locations to a file for further diagnostic analysis later on.
+                    if (screenOn() && hasGPSFix) locationLogger.append(location, hasGPSFix);
 
                     hasGPSFix = true;
                     String fixTypeText = getString(R.string.gnss_fix);

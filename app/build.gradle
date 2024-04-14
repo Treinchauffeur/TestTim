@@ -3,15 +3,15 @@ plugins {
 }
 
 android {
-    namespace 'org.treinchauffeur.testtim'
+    namespace 'nl.ns.ticketer'
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.treinchauffeur.testtim"
+        applicationId "nl.ns.ticketer"
         minSdk 33
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 22066871
+        versionName "NIET TICKETER - TESTTIM"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

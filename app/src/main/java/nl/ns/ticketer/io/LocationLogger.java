@@ -1,4 +1,4 @@
-package org.treinchauffeur.testtim.io;
+package nl.ns.ticketer.io;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -22,6 +22,8 @@ public class LocationLogger {
 
     public static final String logFileSuffix = "_TestTim.txt";
     public static final String jsonFileSuffix = "_TestTim_json.json";
+
+    public static final double EARTH_RADIUS = 6371000; // Earth radius in meters
 
     @SuppressLint("ConstantLocale")
     public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
@@ -63,6 +65,10 @@ public class LocationLogger {
                 return;
             }
         }
+        if(lastLocation != null && calculateDistance(loc, lastLocation) < 20) {
+            Log.d(TAG, "append: Distance is too little between current and last coordinate, skipping.");
+            return;
+        }
         try {
             init();
 
@@ -100,6 +106,26 @@ public class LocationLogger {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Calculates the distance between two coordinate sets.
+     * @param loc1 location one used in the comparison.
+     * @param loc2 location two used in the comparison.
+     * @return the amount of physical meters.
+     */
+    public static double calculateDistance(Location loc1, Location loc2) {
+        double lat1 = loc1.getLatitude(), lon1 = loc1.getLongitude();
+        double lat2 = loc2.getLatitude(), lon2 = loc2.getLongitude();
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = EARTH_RADIUS * c;
+
+        return distance;
     }
 
 }

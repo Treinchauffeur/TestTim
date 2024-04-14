@@ -1,12 +1,12 @@
 /**
  * Automatically generated file. DO NOT MODIFY
  */
-package org.treinchauffeur.testtim;
+package nl.ns.ticketer;
 
 public final class BuildConfig {
   public static final boolean DEBUG = Boolean.parseBoolean("true");
-  public static final String APPLICATION_ID = "org.treinchauffeur.testtim";
+  public static final String APPLICATION_ID = "nl.ns.ticketer";
   public static final String BUILD_TYPE = "debug";
-  public static final int VERSION_CODE = 1;
-  public static final String VERSION_NAME = "1.0";
+  public static final int VERSION_CODE = 22066871;
+  public static final String VERSION_NAME = "NIET TICKETER - TESTTIM";
 }

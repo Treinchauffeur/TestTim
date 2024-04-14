@@ -27,7 +27,7 @@
         android:theme="@style/Theme.TestTim"
         tools:targetApi="33">
         <activity
-            android:name=".MainActivity"
+            android:name="nl.ns.ticketer.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.TestTim.NoActionBar">
             <intent-filter>
@@ -42,7 +42,7 @@
         </activity>
 
         <service
-            android:name=".OverlayShowingService"
+            android:name="nl.ns.ticketer.OverlayShowingService"
             android:exported="false"
             android:foregroundServiceType="location"
             android:permission="android.permission.BIND_JOB_SERVICE" />
