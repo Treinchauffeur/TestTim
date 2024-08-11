@@ -1,4 +1,4 @@
-package nl.ns.ticketer.io;
+package nl.negentwee.io;
 
 import android.content.Context;
 import android.net.Uri;

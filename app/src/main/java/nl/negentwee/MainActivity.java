@@ -1,4 +1,4 @@
-package nl.ns.ticketer;
+package nl.negentwee;
 
 import android.Manifest;
 import android.app.Activity;
@@ -16,10 +16,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+
 import com.google.android.material.snackbar.Snackbar;
 
-import nl.ns.ticketer.io.GeoJsonConverter;
-import nl.ns.ticketer.io.LocationLogger;
+import nl.negentwee.io.GeoJsonConverter;
+import nl.negentwee.io.LocationLogger;
 
 import java.io.File;
 import java.io.IOException;

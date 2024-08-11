@@ -11,7 +11,7 @@
     android:paddingTop="16dp"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context="nl.ns.ticketer.MainActivity">
+    tools:context="nl.negentwee.MainActivity">
 
     <EditText
         android:id="@+id/etExportDate"

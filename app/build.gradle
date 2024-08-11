@@ -3,15 +3,15 @@ plugins {
 }
 
 android {
-    namespace 'nl.ns.ticketer'
+    namespace 'nl.negentwee'
     compileSdk 34
 
     defaultConfig {
-        applicationId "nl.ns.ticketer"
+        applicationId "nl.negentwee"
         minSdk 33
         targetSdk 34
-        versionCode 22066871
-        versionName "TestTim v1.0.2"
+        versionCode 22066872
+        versionName "TestTim v1.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     applicationVariants.configureEach { variant ->

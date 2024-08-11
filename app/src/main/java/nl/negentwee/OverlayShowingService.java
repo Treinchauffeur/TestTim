@@ -1,4 +1,4 @@
-package nl.ns.ticketer;
+package nl.negentwee;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -40,11 +40,12 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import nl.ns.ticketer.io.LocationLogger;
+import nl.negentwee.io.LocationLogger;
 
 import java.util.Iterator;
 
