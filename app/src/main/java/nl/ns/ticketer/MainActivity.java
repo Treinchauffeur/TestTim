@@ -30,7 +30,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
-    private Activity mActivity;
+    private Activity activity;
     double threshold = 0;
     int viewport = 0;
     OverlayShowingService service;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
-        mActivity = this;
+        activity = this;
         Button btnStartService = findViewById(R.id.btnStartService);
         Button exportLogs = findViewById(R.id.exportLogs);
         Button exportJSON = findViewById(R.id.exportJson);
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onClick: fetching " + file.getPath());
 
             if (!file.exists()) {
-                Toast.makeText(mActivity, "File doesn't exist for this day; format DD-MM-YYYY", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "File doesn't exist for this day; format DD-MM-YYYY", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onClick: File doesn't exist.");
                 return;
             }
@@ -114,14 +114,13 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressWarnings("deprecation")//TODO update to latest android standards
     public void checkDrawOverlayPermission() {
-        if (!Settings.canDrawOverlays(mActivity)) {
+        if (!Settings.canDrawOverlays(activity)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, OVERLAY_REQUEST_CODE);
         } else if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            String[] permissions = {/*"android.permission.ACCESS_BACKGROUND_LOCATION",*/ //Apparently we don't actually need this one?? TODO
-                    "android.permission.ACCESS_COARSE_LOCATION",
+            String[] permissions = {"android.permission.ACCESS_COARSE_LOCATION",
                     "android.permission.ACCESS_FINE_LOCATION",
                     "android.permission.SYSTEM_ALERT_WINDOW",
                     "android.permission.POST_NOTIFICATIONS"
@@ -133,19 +132,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFloatingWindow() {
-        Intent intent = new Intent(mActivity, service.getClass());
+        Intent intent = new Intent(activity, service.getClass());
         intent.putExtra("threshold", threshold);
         intent.putExtra("viewport", viewport);
-
-        mActivity.stopService(intent);
-        mActivity.startForegroundService(intent);
+        activity.stopService(intent);
+        activity.startForegroundService(intent);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == OVERLAY_REQUEST_CODE) {
-            if (Settings.canDrawOverlays(mActivity)) {
+            if (Settings.canDrawOverlays(activity)) {
                 openFloatingWindow();
             }
         } else if (requestCode == JSON_REQUEST_CODE) {
@@ -153,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(findViewById(android.R.id.content).getRootView(), "Er is een fout opgetreden!", Snackbar.LENGTH_LONG).show();
                 return;
             }
-            Toast.makeText(mActivity, "Success!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Success!", Toast.LENGTH_SHORT).show();
             try {
                 File file = new File(getFilesDir().getPath() + "/" + exportText.getText() + LocationLogger.logFileSuffix);
                 Uri toConvert = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", file);

@@ -89,7 +89,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tvTitle"
-            android:text="v1.0.0"
+            android:text="@string/versionName"
 
             android:textColor="@color/transparent_white"
             android:textSize="10dp" />

@@ -11,11 +11,12 @@ android {
         minSdk 33
         targetSdk 34
         versionCode 22066871
-        versionName "NIET TICKETER - TESTTIM"
-
+        versionName "TestTim v1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    applicationVariants.configureEach { variant ->
+        variant.resValue "string", "versionName", variant.versionName
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -38,7 +39,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment:2.7.7'
     implementation 'androidx.navigation:navigation-ui:2.7.7'
-    implementation 'com.jjoe64:graphview:4.2.2'
     implementation 'com.jjoe64:graphview:4.2.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

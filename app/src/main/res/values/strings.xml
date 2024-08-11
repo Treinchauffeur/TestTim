@@ -42,6 +42,6 @@
     <string name="error">Error</string>
 
     <!-- Notifications -->
-    <string name="active_in_background">This notification guarantees functioning of TestTim. Therefore it must stay active.</string>
+    <string name="active_in_background">This notification guarantees functioning of TestTim, therefore it must stay active.</string>
 
 </resources>

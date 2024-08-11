@@ -37,5 +37,5 @@
     <string name="set_calibration">Calibreer</string>
 
     <!-- Notifications -->
-    <string name="active_in_background">Deze melding garandeert het functioneren van TestTim. De melding blijft daarom actief in de achtergrond.</string>
+    <string name="active_in_background">Deze melding garandeert het functioneren van TestTim en blijft daarom actief in de achtergrond.</string>
 </resources>
